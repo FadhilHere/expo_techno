@@ -1,6 +1,6 @@
 <template>
     <SidebarProvider>
-        <div class="flex min-h-screen">
+        <div class="w-full flex min-h-screen">
             <!-- Sidebar -->
             <Sidebar collapsible="icon" class="border-r" variant="default">
                 <SidebarHeader>

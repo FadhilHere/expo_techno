@@ -95,7 +95,7 @@ const onSubmit = async () => {
         // Handle successful login (adjust based on your response structure)
         if (response.data.success) {
             // For Inertia, you can use:
-            window.location.href = response.data.redirect || '/dashboard';
+            window.location.href = response.data.redirect || '/admin/Dashboard';
         }
     } catch (error) {
         // Handle login errors
