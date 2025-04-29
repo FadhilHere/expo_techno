@@ -31,15 +31,17 @@ class AuthController extends Controller
         ]);
 
         // Attempt to authenticate
-        if (Auth::attempt([
-            'username' => $request->username,
-            'password' => $request->password
-        ])) {
+        if (
+            Auth::attempt([
+                'username' => $request->username,
+                'password' => $request->password
+            ])
+        ) {
             $request->session()->regenerate();
 
             return response()->json([
                 'success' => true,
-                'redirect' => '/admin/Dashboard'
+                'redirect' => '/admin/dashboard'
             ]);
         }
 
