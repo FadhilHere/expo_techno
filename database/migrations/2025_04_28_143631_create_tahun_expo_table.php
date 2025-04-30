@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->year('tahun');
             $table->text('deskripsi')->nullable();
+            $table->string('photo')->nullable();
             $table->timestamps();
         });
     }

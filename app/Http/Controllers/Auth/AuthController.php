@@ -39,7 +39,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'redirect' => '/admin/Dashboard'
+                'redirect' => route('dashboard')
             ]);
         }
 
@@ -59,14 +59,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/auth/Login');
+        return redirect()->route('login');
     }
 
-    /**
-     * Display the dashboard.
-     */
-    public function dashboard()
-    {
-        return Inertia::render('Dashboard');
-    }
 }

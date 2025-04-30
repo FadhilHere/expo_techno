@@ -25,6 +25,7 @@ class TahunExpo extends Model
     protected $fillable = [
         'tahun',
         'deskripsi',
+        'photo',
     ];
 
     /**
@@ -33,5 +34,19 @@ class TahunExpo extends Model
     public function tenants(): HasMany
     {
         return $this->hasMany(Tenant::class, 'tahun_expo_id');
+    }
+
+    /**
+     * Get the photo URL attribute.
+     *
+     * @return string
+     */
+    public function getPhotoUrlAttribute(): string
+    {
+        if ($this->photo) {
+            return asset('storage/' . $this->photo);
+        }
+
+        return asset('assets/no_image.png');
     }
 }
