@@ -35,7 +35,7 @@ defineProps<{
 const { isMobile } = useSidebar()
 </script>
 
-<template>
+<!-- <template>
   <SidebarGroup class="group-data-[collapsible=icon]:hidden">
     <SidebarGroupLabel>Expo Techno</SidebarGroupLabel>
     <SidebarMenu>
@@ -76,4 +76,4 @@ const { isMobile } = useSidebar()
       </SidebarMenuItem>
     </SidebarMenu>
   </SidebarGroup>
-</template>
+</template> -->

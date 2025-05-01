@@ -25,7 +25,7 @@ class TahunExpo extends Model
     protected $fillable = [
         'tahun',
         'deskripsi',
-        'photo',
+        // 'photo',
     ];
 
     /**
@@ -41,12 +41,12 @@ class TahunExpo extends Model
      *
      * @return string
      */
-    public function getPhotoUrlAttribute(): string
-    {
-        if ($this->photo) {
-            return asset('storage/' . $this->photo);
-        }
+    // public function getPhotoUrlAttribute(): string
+    // {
+    //     if ($this->photo) {
+    //         return asset('storage/' . $this->photo);
+    //     }
 
-        return asset('assets/no_image.png');
-    }
+    //     return asset('assets/no_image.png');
+    // }
 }

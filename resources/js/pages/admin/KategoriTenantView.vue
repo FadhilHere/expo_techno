@@ -30,19 +30,16 @@ import {
 } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Plus, Pencil, Trash2, X } from 'lucide-vue-next'
-import Alert from '@/components/Alert.vue' // Import the separate Alert component
+import { Plus, Pencil, Trash2 } from 'lucide-vue-next'
+import Alert from '@/components/Alert.vue'
 
-interface TahunExpo {
+interface KategoriTenant {
     id: number
-    tahun: string
-    deskripsi: string
-    photo: string | null
-    photo_url: string
+    nama_kategori: string
 }
 
 defineProps<{
-    tahunExpo: TahunExpo[]
+    kategoriTenant: KategoriTenant[]
 }>()
 
 // State management
@@ -50,12 +47,8 @@ const showDialog = ref(false)
 const dialogMode = ref<'add' | 'edit'>('add')
 const formData = ref({
     id: '',
-    tahun: '',
-    deskripsi: '',
-    photo: null as File | null,
-    remove_photo: false
+    nama_kategori: ''
 })
-const photoPreview = ref<string | null>(null)
 const alert = ref({
     show: false,
     type: 'success' as 'success' | 'error',
@@ -82,40 +75,26 @@ const openAddDialog = () => {
     dialogMode.value = 'add'
     formData.value = {
         id: '',
-        tahun: '',
-        deskripsi: '',
-        photo: null,
-        remove_photo: false
+        nama_kategori: ''
     }
-    photoPreview.value = null
     validationErrors.value = {}
     showDialog.value = true
 }
 
-const openEditDialog = (data: TahunExpo) => {
+const openEditDialog = (data: KategoriTenant) => {
     dialogMode.value = 'edit'
-
-    // Reset form data first
     formData.value = {
         id: String(data.id),
-        tahun: String(data.tahun || '').trim(),
-        deskripsi: data.deskripsi || '',
-        photo: null,
-        remove_photo: false
+        nama_kategori: data.nama_kategori || ''
     }
-
-    // console.log('Opening edit dialog with data:', data)
-    // console.log('Form data set to:', formData.value)
-
-    photoPreview.value = data.photo_url
     validationErrors.value = {}
     showDialog.value = true
 
     // Force refresh of input values
     nextTick(() => {
-        const tahunInput = document.getElementById('tahun-input') as HTMLInputElement
-        if (tahunInput) {
-            tahunInput.value = formData.value.tahun
+        const namaInput = document.getElementById('nama-kategori-input') as HTMLInputElement
+        if (namaInput) {
+            namaInput.value = formData.value.nama_kategori
         }
     })
 }
@@ -125,66 +104,35 @@ const confirmDelete = (id: number) => {
     showDeleteDialog.value = true
 }
 
-const handleFileChange = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    if (target.files && target.files.length > 0) {
-        const file = target.files[0]
-        formData.value.photo = file
-        formData.value.remove_photo = false
-
-        // Create preview
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            photoPreview.value = e.target?.result as string
-        }
-        reader.readAsDataURL(file)
-    }
-}
-
-const removePhoto = () => {
-    formData.value.photo = null
-    formData.value.remove_photo = true
-    photoPreview.value = null
-}
-
 const validateForm = () => {
     const errors: Record<string, string> = {}
 
-    // Pastikan tahun tidak kosong
-    if (!formData.value.tahun || formData.value.tahun.trim() === '') {
-        errors.tahun = 'The tahun field is required.'
+    // Validate nama_kategori is not empty
+    if (!formData.value.nama_kategori || formData.value.nama_kategori.trim() === '') {
+        errors.nama_kategori = 'The nama kategori field is required.'
     }
 
     validationErrors.value = errors
     return Object.keys(errors).length === 0
 }
 
-// METODE SUBMIT YANG DIPERBAIKI - UNTUK MENANGANI FORM DENGAN FILE UPLOAD DENGAN BENAR
 const handleSubmit = () => {
     if (isSubmitting.value) return
 
-    // Validasi form sebelum mengirim
+    // Validate form before submitting
     if (!validateForm()) {
         return
     }
 
     isSubmitting.value = true
-    // console.log('Submitting form with data:', formData.value)
 
-    // Penting: terapkan trim pada field tahun
-    const tahunValue = formData.value.tahun.trim()
+    // Apply trim to nama_kategori field
+    const namaKategoriValue = formData.value.nama_kategori.trim()
 
     if (dialogMode.value === 'add') {
-        // Untuk ADD, gunakan FormData normal
-        const submitData = new FormData()
-        submitData.append('tahun', tahunValue)
-        submitData.append('deskripsi', formData.value.deskripsi || '')
-
-        if (formData.value.photo) {
-            submitData.append('photo', formData.value.photo)
-        }
-
-        router.post('/admin/tahun-expo', submitData, {
+        router.post('/admin/kategori-tenant', {
+            nama_kategori: namaKategoriValue
+        }, {
             onSuccess: () => {
                 showDialog.value = false
                 showAlert('success', 'Data berhasil ditambahkan')
@@ -198,28 +146,12 @@ const handleSubmit = () => {
             }
         })
     } else {
-        // Untuk UPDATE
+        // For UPDATE
         const id = formData.value.id
 
-        // Selalu gunakan FormData untuk update agar bisa menangani file
-        const submitData = new FormData()
-
-        // Tambahkan data form
-        submitData.append('tahun', tahunValue)
-        submitData.append('deskripsi', formData.value.deskripsi || '')
-        submitData.append('_method', 'PUT') // Tambahkan _method untuk spoofing PUT
-
-        // Handle file dan remove_photo
-        if (formData.value.photo) {
-            submitData.append('photo', formData.value.photo)
-        }
-
-        if (formData.value.remove_photo) {
-            submitData.append('remove_photo', '1')
-        }
-
-        // Gunakan router.post dengan _method: 'PUT' untuk file upload
-        router.post(`/admin/tahun-expo/${id}`, submitData, {
+        router.put(`/admin/kategori-tenant/${id}`, {
+            nama_kategori: namaKategoriValue
+        }, {
             onSuccess: () => {
                 showDialog.value = false
                 showAlert('success', 'Data berhasil diupdate')
@@ -238,7 +170,7 @@ const handleSubmit = () => {
 const handleDelete = () => {
     if (deleteId.value === null) return
 
-    router.delete(`/admin/tahun-expo/${deleteId.value}`, {
+    router.delete(`/admin/kategori-tenant/${deleteId.value}`, {
         onSuccess: () => {
             showDeleteDialog.value = false
             showAlert('success', 'Data berhasil dihapus')
@@ -253,15 +185,15 @@ const handleDelete = () => {
 
 <template>
     <AuthLayout
-        title="Tahun Expo"
-        description="Kelola data tahun expo"
+        title="Kategori Tenant"
+        description="Kelola data kategori tenant"
     >
         <div class="p-6">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold">Tahun Expo</h1>
+                <h1 class="text-2xl font-bold">Kategori Tenant</h1>
                 <Button @click="openAddDialog">
                     <Plus class="w-4 h-4 mr-2" />
-                    Tambah Tahun
+                    Tambah Kategori
                 </Button>
             </div>
 
@@ -269,24 +201,14 @@ const handleDelete = () => {
                 <TableHeader>
                     <TableRow>
                         <TableHead>No</TableHead>
-                        <TableHead>Photo</TableHead>
-                        <TableHead>Tahun</TableHead>
-                        <TableHead>Deskripsi</TableHead>
+                        <TableHead>Nama Kategori</TableHead>
                         <TableHead>Aksi</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    <TableRow v-for="(item, index) in tahunExpo" :key="item.id">
+                    <TableRow v-for="(item, index) in kategoriTenant" :key="item.id">
                         <TableCell>{{ index + 1 }}</TableCell>
-                        <TableCell>
-                            <img
-                                :src="item.photo_url"
-                                alt="Tahun Expo"
-                                class="w-16 h-16 object-cover rounded"
-                            />
-                        </TableCell>
-                        <TableCell>{{ item.tahun }}</TableCell>
-                        <TableCell>{{ item.deskripsi }}</TableCell>
+                        <TableCell>{{ item.nama_kategori }}</TableCell>
                         <TableCell>
                             <div class="flex space-x-2">
                                 <Button variant="outline" size="icon" @click="openEditDialog(item)">
@@ -306,76 +228,26 @@ const handleDelete = () => {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>
-                            {{ dialogMode === 'add' ? 'Tambah Tahun Expo' : 'Edit Tahun Expo' }}
+                            {{ dialogMode === 'add' ? 'Tambah Kategori Tenant' : 'Edit Kategori Tenant' }}
                         </DialogTitle>
                         <DialogDescription>
-                            Silakan isi formulir berikut untuk {{ dialogMode === 'add' ? 'menambahkan' : 'mengubah' }} data tahun expo.
+                            Silakan isi formulir berikut untuk {{ dialogMode === 'add' ? 'menambahkan' : 'mengubah' }} data kategori tenant.
                         </DialogDescription>
                     </DialogHeader>
                     <form @submit.prevent="handleSubmit" class="space-y-4">
                         <div>
-                            <Label for="tahun-input" class="text-sm font-medium">Tahun</Label>
+                            <Label for="nama-kategori-input" class="text-sm font-medium">Nama Kategori</Label>
                             <Input
-                                id="tahun-input"
-                                v-model="formData.tahun"
+                                id="nama-kategori-input"
+                                v-model="formData.nama_kategori"
                                 type="text"
-                                maxlength="4"
                                 required
-                                :class="{'border-red-500 focus:ring-red-500': validationErrors.tahun}"
-                                :value="formData.tahun"
+                                :class="{'border-red-500 focus:ring-red-500': validationErrors.nama_kategori}"
+                                :value="formData.nama_kategori"
                             />
-                            <p v-if="validationErrors.tahun" class="text-red-500 text-xs mt-1">
-                                {{ validationErrors.tahun }}
+                            <p v-if="validationErrors.nama_kategori" class="text-red-500 text-xs mt-1">
+                                {{ validationErrors.nama_kategori }}
                             </p>
-                        </div>
-
-                        <div>
-                            <Label for="deskripsi" class="text-sm font-medium">Deskripsi</Label>
-                            <Input
-                                id="deskripsi"
-                                v-model="formData.deskripsi"
-                                type="text"
-                                :class="{'border-red-500 focus:ring-red-500': validationErrors.deskripsi}"
-                            />
-                            <p v-if="validationErrors.deskripsi" class="text-red-500 text-xs mt-1">
-                                {{ validationErrors.deskripsi }}
-                            </p>
-                        </div>
-
-                        <div>
-                            <Label for="photo" class="text-sm font-medium">Photo</Label>
-
-                            <!-- Photo Preview -->
-                            <div v-if="photoPreview" class="mt-2 mb-3">
-                                <div class="relative inline-block">
-                                    <img
-                                        :src="photoPreview"
-                                        alt="Photo Preview"
-                                        class="w-32 h-32 object-cover rounded border"
-                                    />
-                                    <button
-                                        type="button"
-                                        @click="removePhoto"
-                                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none"
-                                    >
-                                        <X class="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- File Upload -->
-                            <Input
-                                id="photo"
-                                type="file"
-                                accept="image/*"
-                                @change="handleFileChange"
-                                class="mt-1"
-                                :class="{'border-red-500 focus:ring-red-500': validationErrors.photo}"
-                            />
-                            <p v-if="validationErrors.photo" class="text-red-500 text-xs mt-1">
-                                {{ validationErrors.photo }}
-                            </p>
-                            <p class="text-xs text-gray-500 mt-1">Ukuran maksimal 2MB. Format: JPG, PNG, GIF</p>
                         </div>
 
                         <div class="flex justify-end space-x-2">

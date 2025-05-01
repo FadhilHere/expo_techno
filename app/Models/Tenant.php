@@ -20,6 +20,7 @@ class Tenant extends Model
         'tahun_expo_id',
         'kategori_id',
         'nama_tenant',
+        'logo',
         'deskripsi',
         'whatsapp_tenant',
     ];

@@ -12,6 +12,7 @@ import {
   SidebarHeader,
   SidebarRail,
   useSidebar,
+  SidebarGroupLabel,
 } from '@/components/ui/sidebar'
 
 import {
@@ -26,6 +27,8 @@ import {
   Settings2,
   SquareTerminal,
   TimerIcon,
+  Square,
+  Store,
 } from 'lucide-vue-next'
 
 const props = withDefaults(defineProps<SidebarProps>(), {
@@ -37,8 +40,8 @@ const { state } = useSidebar()
 // This is sample data.
 const data = {
   user: {
-    name: 'shadcn',
-    email: 'm@example.com',
+    name: 'Techno',
+    email: 'Techno Sistem Informasi',
     avatar: '/avatars/shadcn.jpg',
   },
   simpleNav: [
@@ -51,7 +54,17 @@ const data = {
       title: 'Tahun Expo',
       url: '/admin/tahun-expo',
       icon: TimerIcon
-    }
+    },
+    {
+      title: 'Kategori Tenant',
+      url: '/admin/kategori-tenant',
+      icon: Square
+    },
+    {
+      title: 'Tenant',
+      url: '/admin/tenant',
+      icon: Store
+    },
   ],
   navMain: [
     {
@@ -170,6 +183,7 @@ const data = {
       </div>
     </SidebarHeader>
     <SidebarContent>
+        <SidebarGroupLabel>Data Master</SidebarGroupLabel>
       <NavSimple :items="data.simpleNav" />
       <NavMain :items="data.navMain" />
       <NavProjects :projects="data.projects" />

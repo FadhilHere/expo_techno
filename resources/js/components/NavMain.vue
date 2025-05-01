@@ -30,7 +30,7 @@ defineProps<{
 }>()
 </script>
 
-<template>
+<!-- <template>
   <SidebarGroup>
     <SidebarGroupLabel>Data Master</SidebarGroupLabel>
     <SidebarMenu>
@@ -64,4 +64,4 @@ defineProps<{
       </Collapsible>
     </SidebarMenu>
   </SidebarGroup>
-</template>
+</template> -->
