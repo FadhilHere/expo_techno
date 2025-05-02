@@ -7,10 +7,15 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\TahunExpoController;
+use App\Http\Controllers\User\HomeController;
+use App\Http\Controllers\User\AboutusController;
 use Inertia\Inertia;
 use function Pest\Laravel\get;
 
 // Guest User Routes
+Route::get('/', [HomeController::class, 'showHomeView'])->name('home');
+Route::get('/about', [AboutusController::class, 'showAboutusView'])->name('about');
+
 Route::get('/login', [AuthController::class, 'showLogin'])
     ->name('login');
 
@@ -18,12 +23,12 @@ Route::post('/login', [AuthController::class, 'login'])
     ->name('login.post');
 
 // Root redirect - Check if user is authenticated
-Route::get('/', function () {
-    if (auth()->check()) {
-        return redirect()->route('dashboard');
-    }
-    return redirect()->route('login');
-});
+// Route::get('/', function () {
+//     if (auth()->check()) {
+//         return redirect()->route('dashboard');
+//     }
+//     return redirect()->route('login');
+// });
 
 // Admin Routes - Using isLogin middleware
 Route::middleware(['isLogin'])->prefix('admin')->group(function () {

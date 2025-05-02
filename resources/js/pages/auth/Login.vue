@@ -1,41 +1,7 @@
-<template>
-    <div class="flex items-center justify-center min-h-screen bg-background">
-        <div class="w-full max-w-md p-8 space-y-6 bg-card rounded-lg shadow-lg">
-            <div class="space-y-2 text-center">
-                <h1 class="text-2xl font-bold tracking-tight">Login</h1>
-                <p class="text-sm text-muted-foreground">
-                    Enter your credentials to access the system
-                </p>
-            </div>
-
-            <form @submit.prevent="onSubmit" class="space-y-4">
-                <div class="space-y-2">
-                    <Label for="username">Username</Label>
-                    <Input id="username" v-model="form.username" placeholder="Enter your username" />
-                    <p v-if="errors.username" class="text-sm text-red-500">{{ errors.username }}</p>
-                </div>
-
-                <div class="space-y-2">
-                    <Label for="password">Password</Label>
-                    <Input id="password" v-model="form.password" type="password" placeholder="••••••••" />
-                    <p v-if="errors.password" class="text-sm text-red-500">{{ errors.password }}</p>
-                </div>
-
-                <div v-if="loginError" class="text-red-500 text-sm p-2 rounded bg-red-50">
-                    {{ loginError }}
-                </div>
-
-                <Button type="submit" class="w-full" :disabled="isSubmitting">
-                    {{ isSubmitting ? 'Logging in...' : 'Login' }}
-                </Button>
-            </form>
-        </div>
-    </div>
-</template>
-
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import axios from 'axios';
+import UserLayout from '@/layouts/UserLayout.vue';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -109,3 +75,38 @@ const onSubmit = async () => {
     }
 };
 </script>
+
+<template>
+  <UserLayout>
+    <div class="text-center mb-8">
+      <h1 class="text-2xl font-bold">Login</h1>
+      <p class="text-muted-foreground">Enter your credentials to access the system</p>
+    </div>
+
+    <div class="flex items-center justify-center">
+      <div class="w-full max-w-md p-8 space-y-6 bg-card rounded-lg shadow-lg">
+        <form @submit.prevent="onSubmit" class="space-y-4">
+          <div class="space-y-2">
+            <Label for="username">Username</Label>
+            <Input id="username" v-model="form.username" placeholder="Enter your username" />
+            <p v-if="errors.username" class="text-sm text-red-500">{{ errors.username }}</p>
+          </div>
+
+          <div class="space-y-2">
+            <Label for="password">Password</Label>
+            <Input id="password" v-model="form.password" type="password" placeholder="••••••••" />
+            <p v-if="errors.password" class="text-sm text-red-500">{{ errors.password }}</p>
+          </div>
+
+          <div v-if="loginError" class="text-red-500 text-sm p-2 rounded bg-red-50">
+            {{ loginError }}
+          </div>
+
+          <Button type="submit" class="w-full" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Logging in...' : 'Login' }}
+          </Button>
+        </form>
+      </div>
+    </div>
+  </UserLayout>
+</template>
