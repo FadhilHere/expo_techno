@@ -13,6 +13,10 @@ use Inertia\Inertia;
 
 class TenantController extends Controller
 {
+    public function index()
+    {
+        
+    }
     // Method Munculkan Halaman Tenant Beserta Data Secara Descending
     public function showTenant()
     {

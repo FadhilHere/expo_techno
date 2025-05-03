@@ -1,35 +1,38 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3'; // Tambahkan import Head
 import AppNavbar from '@/components/AppNavbar.vue';
+import { Head } from '@inertiajs/vue3'; // Tambahkan import Head
 
 // Props untuk title dan description
 const props = defineProps({
-  title: {
-    type: String,
-    default: 'Welcome'
-  },
-  description: {
-    type: String,
-    default: 'Welcome to our website'
-  }
-})
+    title: {
+        type: String,
+        default: 'Welcome',
+    },
+    description: {
+        type: String,
+        default: 'Welcome to our website',
+    },
+});
 
 // Current year for footer
 const currentYear = new Date().getFullYear();
 </script>
 
 <template>
-    <Head :title="title" /> <!-- Tambahkan Head component -->
+    <Head :title="title" />
+    <!-- Tambahkan Head component -->
 
     <div class="flex min-h-screen flex-col">
         <!-- Navbar -->
         <AppNavbar />
 
-        <!-- Main content area with improved spacing -->
+        <!-- Main content area -->
         <main class="flex-1">
-            <div class="container mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+            <!-- Slot khusus untuk Hero Section yang memerlukan width 100% -->
+            <slot name="hero"></slot>
 
-                <!-- Slot untuk konten dari page yang menggunakan layout ini -->
+            <!-- Container untuk konten lainnya -->
+            <div class="container mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
                 <div class="space-y-8">
                     <slot></slot>
                 </div>

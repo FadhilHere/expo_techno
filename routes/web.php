@@ -15,6 +15,7 @@ use function Pest\Laravel\get;
 // Guest User Routes
 Route::get('/', [HomeController::class, 'showHomeView'])->name('home');
 Route::get('/about', [AboutusController::class, 'showAboutusView'])->name('about');
+Route::get('/tenant/{id}', [HomeController::class, 'showTenantDetail'])->name('tenant.detail');
 
 Route::get('/login', [AuthController::class, 'showLogin'])
     ->name('login');
