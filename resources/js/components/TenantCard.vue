@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css'; // Import CSS Tippy.js
 
 const props = defineProps({
     tenant: {
@@ -8,6 +10,8 @@ const props = defineProps({
         required: true,
     },
 });
+
+const descriptionRef = ref(null);
 
 // Membuat URL WhatsApp untuk menghubungi tenant
 const whatsappLink = computed(() => {
@@ -30,6 +34,30 @@ const limitText = (text, limit = 100) => {
     if (!text) return '';
     return text.length > limit ? text.substring(0, limit) + '...' : text;
 };
+
+// Setup Tippy.js untuk tooltip
+onMounted(() => {
+    if (descriptionRef.value) {
+        tippy(descriptionRef.value, {
+            content: props.tenant.deskripsi || 'Tidak ada deskripsi tersedia untuk UMKM ini.',
+            placement: 'top',
+            theme: 'light',
+            maxWidth: 350,
+            delay: [0, 200],
+            arrow: true,
+            allowHTML: true,
+            interactive: true,
+            // Custom styling untuk tooltip
+            onShow(instance) {
+                // Hanya tampilkan tooltip jika teks sudah dipotong
+                const truncatedText = limitText(props.tenant.deskripsi || '', 100);
+                if (truncatedText === props.tenant.deskripsi) {
+                    return false; // Jangan tampilkan tooltip jika teks tidak dipotong
+                }
+            }
+        });
+    }
+});
 </script>
 
 <template>
@@ -63,7 +91,11 @@ const limitText = (text, limit = 100) => {
 
         <!-- Content Area -->
         <div class="p-5">
-            <p class="mb-4 h-12 overflow-hidden text-xs text-gray-600 md:text-sm">
+            <!-- Deskripsi dengan Tippy.js tooltip -->
+            <p
+                ref="descriptionRef"
+                class="mb-4 h-12 overflow-hidden text-xs text-gray-600 md:text-sm cursor-help"
+            >
                 {{ limitText(tenant.deskripsi || 'Tidak ada deskripsi tersedia untuk UMKM ini.') }}
             </p>
 

@@ -1,10 +1,20 @@
 <script setup lang="ts">
 import UserLayout from '@/layouts/UserLayout.vue';
-import { computed } from 'vue';
+import { computed, ref, onMounted } from 'vue';
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
 
-// Props dari controller
 const props = defineProps({
     tenant: Object,
+});
+
+// Order state
+const orderItems = ref([]);
+const showOrderModal = ref(false);
+const orderForm = ref({
+    nama_pemesan: '',
+    nomor_pemesan: '',
+    catatan: ''
 });
 
 // Format harga ke format rupiah
@@ -21,7 +31,6 @@ const whatsappLink = computed(() => {
     if (!props.tenant.whatsapp_tenant) return null;
 
     let number = props.tenant.whatsapp_tenant;
-    // Memastikan format nomor benar
     if (number.startsWith('0')) {
         number = '62' + number.substring(1);
     }
@@ -30,6 +39,107 @@ const whatsappLink = computed(() => {
     }
 
     return `https://wa.me/${number}`;
+});
+
+// Order methods
+const addToOrder = (product) => {
+    const existingItem = orderItems.value.find(item => item.id === product.id);
+
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        orderItems.value.push({
+            ...product,
+            quantity: 1
+        });
+    }
+};
+
+const removeFromOrder = (product) => {
+    const existingItem = orderItems.value.find(item => item.id === product.id);
+
+    if (existingItem) {
+        if (existingItem.quantity > 1) {
+            existingItem.quantity -= 1;
+        } else {
+            orderItems.value = orderItems.value.filter(item => item.id !== product.id);
+        }
+    }
+};
+
+const getProductQuantity = (productId) => {
+    const item = orderItems.value.find(item => item.id === productId);
+    return item ? item.quantity : 0;
+};
+
+const totalPrice = computed(() => {
+    return orderItems.value.reduce((total, item) => {
+        return total + (item.harga * item.quantity);
+    }, 0);
+});
+
+const submitOrder = () => {
+    // Create order message for WhatsApp
+    let message = `*Order dari ${orderForm.value.nama_pemesan}*\n\n`;
+    message += `Nomor Pemesan: ${orderForm.value.nomor_pemesan}\n\n`;
+    message += `*Daftar Produk:*\n`;
+
+    orderItems.value.forEach(item => {
+        message += `${item.nama_produk} - ${item.quantity}x ${formatPrice(item.harga)}\n`;
+    });
+
+    message += `\n*Total: ${formatPrice(totalPrice.value)}*\n\n`;
+    if (orderForm.value.catatan) {
+        message += `Catatan: ${orderForm.value.catatan}`;
+    }
+
+    // Encode message and open WhatsApp
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`${whatsappLink.value}&text=${encodedMessage}`, '_blank');
+
+    // Reset form
+    showOrderModal.value = false;
+    orderItems.value = [];
+    orderForm.value = {
+        nama_pemesan: '',
+        nomor_pemesan: '',
+        catatan: ''
+    };
+};
+
+// Function untuk membatasi teks deskripsi
+const limitText = (text, limit = 100) => {
+    if (!text) return '';
+    return text.length > limit ? text.substring(0, limit) + '...' : text;
+};
+
+// Setup Tippy.js untuk tooltip
+onMounted(() => {
+    // Setup tooltips untuk semua deskripsi produk
+    setTimeout(() => {
+        const descriptionRefs = document.querySelectorAll('.product-description');
+        descriptionRefs.forEach((ref, index) => {
+            const product = props.tenant.products[index];
+            if (product?.deskripsi) {
+                tippy(ref, {
+                    content: product.deskripsi,
+                    placement: 'top',
+                    theme: 'light',
+                    maxWidth: 350,
+                    delay: [0, 200],
+                    arrow: true,
+                    allowHTML: true,
+                    interactive: true,
+                    onShow(instance) {
+                        const truncatedText = limitText(product.deskripsi, 100);
+                        if (truncatedText === product.deskripsi) {
+                            return false;
+                        }
+                    }
+                });
+            }
+        });
+    }, 100);
 });
 </script>
 
@@ -101,6 +211,54 @@ const whatsappLink = computed(() => {
                 </div>
             </div>
 
+            <!-- Order Section -->
+            <div v-if="orderItems.length > 0" class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div class="p-6 md:p-8">
+                    <h2 class="mb-4 text-xl font-bold">Pesanan Anda</h2>
+
+                    <!-- Order Items -->
+                    <div class="space-y-4">
+                        <div
+                            v-for="item in orderItems"
+                            :key="item.id"
+                            class="flex items-center justify-between border-b border-gray-100 last:border-0 pb-4 last:pb-0"
+                        >
+                            <div class="flex items-center space-x-4">
+                                <img
+                                    :src="item.foto_url"
+                                    :alt="item.nama_produk"
+                                    class="h-16 w-16 rounded-lg object-cover"
+                                    onerror="this.src='/assets/no_image.png'"
+                                />
+                                <div>
+                                    <h3 class="font-semibold">{{ item.nama_produk }}</h3>
+                                    <p class="text-sm text-gray-600">{{ formatPrice(item.harga) }} × {{ item.quantity }}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold">{{ formatPrice(item.harga * item.quantity) }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total -->
+                    <div class="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
+                        <p class="text-lg font-bold">Total</p>
+                        <p class="text-xl font-bold">{{ formatPrice(totalPrice) }}</p>
+                    </div>
+
+                    <!-- Order Button -->
+                    <div class="mt-6">
+                        <button
+                            @click="showOrderModal = true"
+                            class="w-full rounded-lg bg-black px-4 py-3 text-white transition-colors hover:bg-gray-800"
+                        >
+                            Lanjut ke Pemesanan
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Products Section -->
             <div>
                 <h2 class="mb-4 text-2xl font-bold">Produk {{ tenant.nama_tenant }}</h2>
@@ -110,7 +268,7 @@ const whatsappLink = computed(() => {
                     <div
                         v-for="product in tenant.products"
                         :key="product.id"
-                        class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                        class="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
                     >
                         <!-- Product Image -->
                         <div class="aspect-video w-full overflow-hidden bg-gray-100">
@@ -123,22 +281,39 @@ const whatsappLink = computed(() => {
                         </div>
 
                         <!-- Product Info -->
-                        <div class="p-4">
+                        <div class="flex flex-1 flex-col p-4">
                             <h3 class="mb-1 text-lg font-semibold">{{ product.nama_produk }}</h3>
                             <p class="mb-2 font-bold text-gray-700">{{ formatPrice(product.harga) }}</p>
-                            <p class="text-sm text-gray-600">
-                                {{ product.deskripsi ? product.deskripsi : 'Tidak ada deskripsi produk.' }}
+
+                            <!-- Description with Tippy Tooltip -->
+                            <p class="product-description mb-4 h-12 overflow-hidden text-sm text-gray-600 cursor-help">
+                                {{ limitText(product.deskripsi ? product.deskripsi : 'Tidak ada deskripsi produk.') }}
                             </p>
 
-                            <!-- CTA Button -->
-                            <div v-if="whatsappLink" class="mt-4">
-                                <a
-                                    :href="`${whatsappLink}&text=Halo, saya tertarik dengan produk ${product.nama_produk} dari ${tenant.nama_tenant}.`"
-                                    target="_blank"
-                                    class="block w-full rounded-lg bg-black py-2 text-center text-sm text-white transition-colors hover:bg-gray-800"
-                                >
-                                    Pesan Sekarang
-                                </a>
+                            <!-- Quantity Controls - Positioned at bottom -->
+                            <div class="mt-auto flex items-center justify-between gap-4">
+                                <div class="flex items-center">
+                                    <button
+                                        @click="removeFromOrder(product)"
+                                        :disabled="getProductQuantity(product.id) === 0"
+                                        class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    <div class="w-12 text-center font-medium">
+                                        {{ getProductQuantity(product.id) }}
+                                    </div>
+                                    <button
+                                        @click="addToOrder(product)"
+                                        class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-50"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -149,6 +324,60 @@ const whatsappLink = computed(() => {
                     <div class="mb-4 text-5xl">📦</div>
                     <h3 class="mb-2 text-xl font-semibold">Belum ada produk</h3>
                     <p class="text-gray-600">UMKM ini belum menambahkan produk yang dijual.</p>
+                </div>
+            </div>
+
+            <!-- Order Modal - Updated without dark overlay -->
+            <div v-if="showOrderModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+                    <h2 class="mb-4 text-xl font-bold">Form Pemesanan</h2>
+
+                    <form @submit.prevent="submitOrder" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nama Pemesan</label>
+                            <input
+                                v-model="orderForm.nama_pemesan"
+                                type="text"
+                                required
+                                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+                            />
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
+                            <input
+                                v-model="orderForm.nomor_pemesan"
+                                type="tel"
+                                required
+                                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+                            />
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Catatan (Opsional)</label>
+                            <textarea
+                                v-model="orderForm.catatan"
+                                rows="3"
+                                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+                            ></textarea>
+                        </div>
+
+                        <div class="mt-6 flex space-x-3">
+                            <button
+                                type="submit"
+                                class="flex-1 rounded-lg bg-black px-4 py-2 text-white transition-colors hover:bg-gray-800"
+                            >
+                                Order
+                            </button>
+                            <button
+                                type="button"
+                                @click="showOrderModal = false"
+                                class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50"
+                            >
+                                Batal
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
