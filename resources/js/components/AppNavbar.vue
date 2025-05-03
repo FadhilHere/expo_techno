@@ -38,19 +38,19 @@ const applyTheme = (newTheme: string) => {
 </script>
 
 <template>
-    <header class="bg-background/100 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur">
-        <div class="container flex h-16 items-center justify-between px-24 py-8">
-            <!-- Left section with brand name -->
+    <header class="bg-background/100 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b px-50 py-4 backdrop-blur">
+        <div class="flex h-full items-center justify-between">
+            <!-- Left section with brand -->
             <div class="flex items-center">
                 <a href="/" class="font-bold">
-                    <img :src="'/assets/Logo_polos.png'" alt="Techno Logo" class="mr-2 h-8" />
+                    <img :src="'/assets/Logo_polos.png'" alt="Techno Logo" class="h-8" />
                 </a>
             </div>
 
             <!-- Center section with navigation links -->
             <div class="flex items-center justify-center">
                 <NavigationMenu>
-                    <NavigationMenuList>
+                    <NavigationMenuList class="flex gap-6">
                         <NavigationMenuItem>
                             <NavigationMenuLink href="/"> Home </NavigationMenuLink>
                         </NavigationMenuItem>
