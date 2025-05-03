@@ -4,7 +4,7 @@ import UserLayout from '@/layouts/UserLayout.vue'
 
 <template>
   <UserLayout
-    title="Welcome to Techno"
+    title="Home"
     description="Your trusted partner in technology solutions"
   >
     <div class="grid gap-6">

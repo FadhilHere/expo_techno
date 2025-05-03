@@ -17,6 +17,8 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun } from 'lucide-vue-next';
+import { Head } from '@inertiajs/vue3';
+
 
 // Interface for breadcrumb items
 interface BreadcrumbItem {
@@ -93,6 +95,7 @@ const applyTheme = (newTheme: string) => {
 </script>
 
 <template>
+    <Head :title="title" />
     <SidebarProvider>
         <!-- AppSidebar di bagian luar, akan muncul di posisi fixed -->
         <AppSidebar />

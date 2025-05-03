@@ -22,14 +22,6 @@ Route::get('/login', [AuthController::class, 'showLogin'])
 Route::post('/login', [AuthController::class, 'login'])
     ->name('login.post');
 
-// Root redirect - Check if user is authenticated
-// Route::get('/', function () {
-//     if (auth()->check()) {
-//         return redirect()->route('dashboard');
-//     }
-//     return redirect()->route('login');
-// });
-
 // Admin Routes - Using isLogin middleware
 Route::middleware(['isLogin'])->prefix('admin')->group(function () {
     // Dashboard

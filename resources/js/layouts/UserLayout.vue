@@ -1,23 +1,26 @@
 <script setup lang="ts">
+import { Head } from '@inertiajs/vue3'; // Tambahkan import Head
 import AppNavbar from '@/components/AppNavbar.vue';
 
 // Props untuk title dan description
-// const props = defineProps({
-//   title: {
-//     type: String,
-//     default: 'Welcome'
-//   },
-//   description: {
-//     type: String,
-//     default: 'Welcome to our website'
-//   }
-// })
+const props = defineProps({
+  title: {
+    type: String,
+    default: 'Welcome'
+  },
+  description: {
+    type: String,
+    default: 'Welcome to our website'
+  }
+})
 
 // Current year for footer
 const currentYear = new Date().getFullYear();
 </script>
 
 <template>
+    <Head :title="title" /> <!-- Tambahkan Head component -->
+
     <div class="flex min-h-screen flex-col">
         <!-- Navbar -->
         <AppNavbar />
@@ -25,10 +28,6 @@ const currentYear = new Date().getFullYear();
         <!-- Main content area with improved spacing -->
         <main class="flex-1">
             <div class="container mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
-                <!-- <div class="mb-10">
-                    <h1 class="mb-2 text-3xl font-bold tracking-tight">{{ title }}</h1>
-                    <p class="text-muted-foreground text-lg">{{ description }}</p>
-                </div> -->
 
                 <!-- Slot untuk konten dari page yang menggunakan layout ini -->
                 <div class="space-y-8">
