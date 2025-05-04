@@ -81,7 +81,7 @@ const scrollToTenants = (event) => {
                 <!-- Right Content - Cards -->
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <!-- Card 1 - Main -->
-                    <div class="col-span-2 overflow-hidden rounded-3xl bg-cover bg-center" style="background-image: url('/assets/expotenant1.jpg')">
+                    <div class="col-span-2 overflow-hidden rounded-3xl bg-cover bg-center" style="background-image: url('/assets/expotenant2.jpg')">
                         <div class="flex h-full flex-col justify-end bg-gradient-to-t from-black/70 to-transparent p-6">
                             <span class="text-sm text-white/80">Mendukung ekonomi lokal</span>
                             <h3 class="text-3xl font-semibold text-white">Puluhan UMKM berpartisipasi</h3>
@@ -89,7 +89,7 @@ const scrollToTenants = (event) => {
                     </div>
 
                     <!-- Card 2 -->
-                    <div class="overflow-hidden rounded-3xl bg-cover bg-center" style="background-image: url('/assets/expotenant2.jpg')">
+                    <div class="overflow-hidden rounded-3xl bg-cover bg-center" style="background-image: url('/assets/expotenant1.jpg')">
                         <div class="flex h-full flex-col justify-end bg-gradient-to-t from-black/70 to-transparent p-6">
                             <span class="text-sm text-white/80">Produk berkualitas tinggi</span>
                             <h3 class="text-2xl font-semibold text-white">Karya terbaik lokal</h3>
