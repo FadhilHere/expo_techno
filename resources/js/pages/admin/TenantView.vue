@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Alert from '@/components/Alert.vue'; // Import the separate Alert component
+import Alert from '@/components/Alert.vue';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -19,8 +19,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Textarea } from '@/components/ui/textarea';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { router } from '@inertiajs/vue3';
-import { Package, Pencil, Plus, Trash2, X } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { Package, Pencil, Plus, Search, Trash2, X } from 'lucide-vue-next';
+import { computed, ref, watch } from 'vue';
 
 // Definisi breadcrumb
 const breadcrumbItems = computed(() => {
@@ -53,7 +53,7 @@ interface KategoriTenant {
     nama_kategori: string;
 }
 
-defineProps<{
+const props = defineProps<{
     tenants: Tenant[];
     tahunExpos: TahunExpo[];
     kategoriTenants: KategoriTenant[];
@@ -82,7 +82,68 @@ const deleteId = ref<number | null>(null);
 const showDeleteDialog = ref(false);
 const validationErrors = ref<Record<string, string>>({});
 const isSubmitting = ref(false);
-const isDeleting = ref(false); // Add state for tracking delete process
+const isDeleting = ref(false);
+
+// State for datatable features
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
+const searchQuery = ref('');
+const selectedKategori = ref<string | null>(null);
+
+// Filtered tenants based on search and filters
+const filteredTenants = computed(() => {
+    let filtered = [...props.tenants];
+
+    // Filter by search term (hanya nama tenant dan whatsapp)
+    if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase();
+        filtered = filtered.filter(
+            (tenant) =>
+                tenant.nama_tenant.toLowerCase().includes(query) || (tenant.whatsapp_tenant && tenant.whatsapp_tenant.toLowerCase().includes(query)),
+        );
+    }
+
+    // Filter by kategori (hanya filter jika bukan "Semua Kategori")
+    if (selectedKategori.value && selectedKategori.value !== '0') {
+        filtered = filtered.filter((tenant) => tenant.kategori_id === parseInt(selectedKategori.value));
+    }
+
+    return filtered;
+});
+
+// Reset page when filters change
+watch([searchQuery, selectedKategori], () => {
+    currentPage.value = 1;
+});
+
+// Paginated tenants
+const paginatedTenants = computed(() => {
+    const startIndex = (currentPage.value - 1) * itemsPerPage.value;
+    const endIndex = startIndex + itemsPerPage.value;
+    return filteredTenants.value.slice(startIndex, endIndex);
+});
+
+// Total pages
+const totalPages = computed(() => Math.ceil(filteredTenants.value.length / itemsPerPage.value));
+
+// Previous page
+const previousPage = () => {
+    if (currentPage.value > 1) {
+        currentPage.value--;
+    }
+};
+
+// Next page
+const nextPage = () => {
+    if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+    }
+};
+
+// Go to page
+const goToPage = (page: number) => {
+    currentPage.value = page;
+};
 
 const showAlert = (type: 'success' | 'error', message: string) => {
     alert.value = {
@@ -90,9 +151,6 @@ const showAlert = (type: 'success' | 'error', message: string) => {
         type,
         message,
     };
-    setTimeout(() => {
-        alert.value.show = false;
-    }, 5000); // Otomatis hilang setelah 5 detik
 };
 
 // Form handlers
@@ -304,6 +362,31 @@ const handleDelete = () => {
                 </Button>
             </div>
 
+            <!-- Filters - Hanya 2 filter sejajar -->
+            <div class="mb-6 grid gap-4 md:grid-cols-2">
+                <div>
+                    <div class="relative">
+                        <Search class="absolute top-3 left-3 h-4 w-4 text-gray-400" />
+                        <Input v-model="searchQuery" class="pl-10" placeholder="Cari nama tenant, whatsapp..." />
+                    </div>
+                </div>
+
+                <div>
+                    <Select v-model="selectedKategori">
+                        <SelectTrigger>
+                            <SelectValue placeholder="Filter Kategori" />
+                        </SelectTrigger>
+                        <SelectContent class="z-50 overflow-auto">
+                            <SelectItem value="0">Semua Kategori</SelectItem>
+                            <SelectItem v-for="kategori in kategoriTenants" :key="kategori.id" :value="String(kategori.id)">
+                                {{ kategori.nama_kategori }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            <!-- Table -->
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -317,8 +400,8 @@ const handleDelete = () => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    <TableRow v-for="(item, index) in tenants" :key="item.id">
-                        <TableCell>{{ index + 1 }}</TableCell>
+                    <TableRow v-for="(item, index) in paginatedTenants" :key="item.id">
+                        <TableCell>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</TableCell>
                         <TableCell>
                             <img :src="item.logo_url" alt="Logo Tenant" class="h-16 w-16 rounded object-cover" />
                         </TableCell>
@@ -340,11 +423,40 @@ const handleDelete = () => {
                             </div>
                         </TableCell>
                     </TableRow>
+                    <TableRow v-if="paginatedTenants.length === 0">
+                        <TableCell colspan="7" class="py-8 text-center"> Tidak ada data tenant yang ditemukan. </TableCell>
+                    </TableRow>
                 </TableBody>
             </Table>
 
+            <!-- Pagination -->
+            <div class="mt-4 flex items-center justify-between">
+                <div class="text-sm text-gray-500">Menampilkan {{ paginatedTenants.length }} dari {{ filteredTenants.length }} data</div>
+                <div class="flex items-center space-x-2">
+                    <Button variant="outline" size="sm" :disabled="currentPage === 1" @click="previousPage"> Sebelumnya </Button>
+
+                    <span v-for="page in totalPages" :key="page">
+                        <Button
+                            size="sm"
+                            :variant="page === currentPage ? 'default' : 'outline'"
+                            @click="goToPage(page)"
+                            class="mx-1 hidden sm:inline-flex"
+                            v-if="page <= 5 || page === totalPages || Math.abs(page - currentPage) <= 1"
+                        >
+                            {{ page }}
+                        </Button>
+                        <span v-else-if="(page === 6 && currentPage <= 4) || (page === totalPages - 1 && currentPage >= totalPages - 3)" class="mx-1"
+                            >...</span
+                        >
+                    </span>
+
+                    <Button variant="outline" size="sm" :disabled="currentPage === totalPages || totalPages === 0" @click="nextPage">
+                        Selanjutnya
+                    </Button>
+                </div>
+            </div>
+
             <!-- Form Dialog -->
-            <!-- Form Dialog dengan scrolling yang dioptimalkan -->
             <Dialog v-model:open="showDialog">
                 <DialogContent class="flex max-h-[90vh] max-w-2xl flex-col overflow-hidden">
                     <DialogHeader class="flex-shrink-0">

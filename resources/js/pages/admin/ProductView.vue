@@ -18,8 +18,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Textarea } from '@/components/ui/textarea';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { router } from '@inertiajs/vue3';
-import { ArrowLeft, Pencil, Plus, Trash2, X } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { ArrowLeft, Pencil, Plus, Search, Trash2, X } from 'lucide-vue-next';
+import { computed, ref, watch } from 'vue';
 
 interface Product {
     id: number;
@@ -76,6 +76,58 @@ const showDeleteDialog = ref(false);
 const validationErrors = ref<Record<string, string>>({});
 const isSubmitting = ref(false);
 
+// Datatable state
+const searchQuery = ref('');
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
+
+// Filtered products based on search
+const filteredProducts = computed(() => {
+    let filtered = [...props.products];
+
+    // Filter by search term
+    if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase();
+        filtered = filtered.filter((product) => product.nama_produk.toLowerCase().includes(query));
+    }
+
+    return filtered;
+});
+
+// Reset page when filter changes
+watch([searchQuery], () => {
+    currentPage.value = 1;
+});
+
+// Paginated products
+const paginatedProducts = computed(() => {
+    const startIndex = (currentPage.value - 1) * itemsPerPage.value;
+    const endIndex = startIndex + itemsPerPage.value;
+    return filteredProducts.value.slice(startIndex, endIndex);
+});
+
+// Total pages
+const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage.value));
+
+// Previous page
+const previousPage = () => {
+    if (currentPage.value > 1) {
+        currentPage.value--;
+    }
+};
+
+// Next page
+const nextPage = () => {
+    if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+    }
+};
+
+// Go to page
+const goToPage = (page: number) => {
+    currentPage.value = page;
+};
+
 const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -90,9 +142,6 @@ const showAlert = (type: 'success' | 'error', message: string) => {
         type,
         message,
     };
-    setTimeout(() => {
-        alert.value.show = false;
-    }, 5000); // Otomatis hilang setelah 5 detik
 };
 
 // Form handlers
@@ -280,7 +329,7 @@ const backToTenants = () => {
         :description="'Kelola produk untuk tenant ' + tenant.nama_tenant"
         :breadcrumbs="breadcrumbItems"
     >
-        <div class="space-y-6">
+        <div class="space-y-6 p-6">
             <!-- Back button and title -->
             <div class="mb-6 flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -322,8 +371,16 @@ const backToTenants = () => {
                 </div>
             </div>
 
+            <!-- Search filter -->
+            <div class="mb-4 flex">
+                <div class="relative w-full max-w-md">
+                    <Search class="absolute top-3 left-3 h-4 w-4 text-gray-400" />
+                    <Input v-model="searchQuery" class="pl-10" placeholder="Cari nama produk..." />
+                </div>
+            </div>
+
             <!-- Products table -->
-            <Table v-if="products.length > 0">
+            <Table v-if="filteredProducts.length > 0">
                 <TableHeader>
                     <TableRow>
                         <TableHead>No</TableHead>
@@ -335,8 +392,8 @@ const backToTenants = () => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    <TableRow v-for="(item, index) in products" :key="item.id">
-                        <TableCell>{{ index + 1 }}</TableCell>
+                    <TableRow v-for="(item, index) in paginatedProducts" :key="item.id">
+                        <TableCell>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</TableCell>
                         <TableCell>
                             <img :src="item.foto_produk_url" alt="Foto Produk" class="h-16 w-16 rounded object-cover" />
                         </TableCell>
@@ -357,8 +414,42 @@ const backToTenants = () => {
                 </TableBody>
             </Table>
 
+            <!-- Empty state -->
             <div v-else class="py-8 text-center">
-                <p class="text-muted-foreground">Belum ada produk untuk tenant ini. Klik 'Tambah Produk' untuk mulai menambahkan produk.</p>
+                <p class="text-muted-foreground">
+                    {{
+                        searchQuery
+                            ? 'Tidak ada produk yang sesuai dengan pencarian Anda.'
+                            : "Belum ada produk untuk tenant ini. Klik 'Tambah Produk' untuk mulai menambahkan produk."
+                    }}
+                </p>
+            </div>
+
+            <!-- Pagination -->
+            <div v-if="filteredProducts.length > 0" class="mt-4 flex items-center justify-between">
+                <div class="text-sm text-gray-500">Menampilkan {{ paginatedProducts.length }} dari {{ filteredProducts.length }} data</div>
+                <div class="flex items-center space-x-2">
+                    <Button variant="outline" size="sm" :disabled="currentPage === 1" @click="previousPage"> Sebelumnya </Button>
+
+                    <span v-for="page in totalPages" :key="page">
+                        <Button
+                            size="sm"
+                            :variant="page === currentPage ? 'default' : 'outline'"
+                            @click="goToPage(page)"
+                            class="mx-1 hidden sm:inline-flex"
+                            v-if="page <= 5 || page === totalPages || Math.abs(page - currentPage) <= 1"
+                        >
+                            {{ page }}
+                        </Button>
+                        <span v-else-if="(page === 6 && currentPage <= 4) || (page === totalPages - 1 && currentPage >= totalPages - 3)" class="mx-1"
+                            >...</span
+                        >
+                    </span>
+
+                    <Button variant="outline" size="sm" :disabled="currentPage === totalPages || totalPages === 0" @click="nextPage">
+                        Selanjutnya
+                    </Button>
+                </div>
             </div>
 
             <!-- Form Dialog -->
