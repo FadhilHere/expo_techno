@@ -5,7 +5,8 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\KategoriTenant;
-use App\Models\PreOrder; // Tambahkan model PreOrder
+use App\Models\PreOrder;
+use App\Models\TahunExpo;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -16,7 +17,7 @@ class HomeController extends Controller
     {
         $tenants = Tenant::with(['tahunExpo', 'kategori', 'products'])
             ->orderBy('created_at', 'desc')
-            ->limit(6)  // Ambil 6 tenant terbaru
+            // ->limit(6)  // Ambil 6 tenant terbaru - sudah dihapus agar semua tenant ditampilkan
             ->get()
             ->map(function ($tenant) {
                 return [
@@ -47,6 +48,18 @@ class HomeController extends Controller
                 ];
             });
 
+        // Ambil data tahun expo terbaru untuk hero section
+        $latestTahunExpo = TahunExpo::latest('tahun')->first();
+        $tahunExpoData = null;
+
+        if ($latestTahunExpo) {
+            $tahunExpoData = [
+                'id' => $latestTahunExpo->id,
+                'tahun' => $latestTahunExpo->tahun,
+                'deskripsi' => $latestTahunExpo->deskripsi,
+            ];
+        }
+
         return Inertia::render('user/HomeView', [
             'tenants' => $tenants,
             'kategoriTenants' => $kategoriTenants,
@@ -54,6 +67,7 @@ class HomeController extends Controller
                 'totalTenants' => $totalTenants,
                 'totalOrders' => $totalOrders, // Tambahkan total orders
             ],
+            'tahunExpo' => $tahunExpoData,
             'flash' => [
                 'order_success' => session('order_success')
             ]

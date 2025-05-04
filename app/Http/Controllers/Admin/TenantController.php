@@ -15,7 +15,7 @@ class TenantController extends Controller
 {
     public function index()
     {
-        
+
     }
     // Method Munculkan Halaman Tenant Beserta Data Secara Descending
     public function showTenant()
@@ -79,7 +79,7 @@ class TenantController extends Controller
             'nama_tenant' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'whatsapp_tenant' => 'nullable|string|max:20',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5128',
         ]);
 
         $tenant = new Tenant();

@@ -140,6 +140,71 @@ onMounted(() => {
         });
     }, 100);
 });
+
+// Kategori badge style dengan warna yang lebih tegas untuk tampilan detail
+const getCategoryStyle = computed(() => {
+    if (!props.tenant.kategori) return 'bg-gray-100 text-gray-800';
+
+    // Mapping khusus untuk beberapa kategori umum
+    const specificStyles = {
+        'Food & Beverage': 'bg-red-500 text-white',
+        'Digital & Technology': 'bg-blue-500 text-white',
+        'Beauty & Wellness': 'bg-pink-500 text-white',
+        'Fashion & Accessories': 'bg-purple-500 text-white',
+        'Bakery & Dessert': 'bg-yellow-500 text-white',
+        Handicraft: 'bg-amber-500 text-white',
+        'Home Decor': 'bg-emerald-500 text-white',
+        Services: 'bg-gray-700 text-white',
+    };
+
+    // Cek apakah kategori memiliki style khusus
+    if (specificStyles[props.tenant.kategori]) {
+        return specificStyles[props.tenant.kategori];
+    }
+
+    // Untuk kategori lain, gunakan sistem warna yang lebih beragam
+    const colorStyles = [
+        'bg-violet-600 text-white',
+        'bg-fuchsia-600 text-white',
+        'bg-rose-600 text-white',
+        'bg-orange-600 text-white',
+        'bg-amber-600 text-white',
+        'bg-lime-600 text-white',
+        'bg-emerald-600 text-white',
+        'bg-teal-600 text-white',
+        'bg-cyan-600 text-white',
+        'bg-indigo-600 text-white',
+        'bg-blue-600 text-white',
+        'bg-sky-600 text-white',
+        'bg-green-600 text-white',
+        'bg-pink-600 text-white',
+        'bg-purple-600 text-white',
+    ];
+
+    // Membuat hash dari nama kategori
+    const hash = props.tenant.kategori.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+    // Memilih warna berdasarkan hash
+    return colorStyles[hash % colorStyles.length];
+});
+
+// Warna aksen untuk tenant (digunakan di bagian bawah)
+const accentColor = computed(() => {
+    if (!props.tenant.nama_tenant) return 'bg-gray-200';
+
+    // Array warna sesuai dengan logo
+    const colors = [
+        'bg-amber-400', // kuning
+        'bg-red-500', // merah
+        'bg-orange-400', // oranye
+        'bg-violet-500', // ungu
+    ];
+
+    // Menggunakan string hash sederhana untuk memilih warna
+    const hash = props.tenant.nama_tenant.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+    return colors[hash % colors.length];
+});
 </script>
 
 <template>
@@ -204,7 +269,10 @@ onMounted(() => {
             </div>
 
             <!-- Tenant Profile Section -->
-            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div class="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                <!-- Accent color bar at top -->
+                <div :class="[accentColor, 'h-1 w-full']"></div>
+
                 <div class="p-6 md:p-8">
                     <div class="flex flex-col items-start gap-6 md:flex-row">
                         <!-- Logo -->
@@ -220,7 +288,7 @@ onMounted(() => {
                         <!-- Info -->
                         <div class="flex-1">
                             <div class="mb-2 flex flex-wrap gap-2">
-                                <span v-if="tenant.kategori" class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-800">
+                                <span v-if="tenant.kategori" :class="['rounded-full px-2.5 py-1 text-xs font-medium', getCategoryStyle]">
                                     {{ tenant.kategori }}
                                 </span>
                                 <span v-if="tenant.tahun_expo" class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-800">

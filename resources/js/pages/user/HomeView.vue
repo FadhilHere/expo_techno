@@ -10,6 +10,7 @@ const props = defineProps({
     tenants: Array,
     kategoriTenants: Array,
     stats: Object,
+    tahunExpo: Object, // Tambahkan prop tahunExpo
     flash: Object, // Tambahkan prop flash
 });
 
@@ -55,11 +56,12 @@ const formatPrice = (price) => {
 <template>
     <UserLayout title="Home" description="Your trusted partner in technology solutions">
         <template #hero>
-            <HeroSectionView />
+            <!-- Teruskan props tahunExpo dan stats ke HeroSectionView -->
+            <HeroSectionView :tahunExpo="tahunExpo" :stats="stats" />
         </template>
 
         <!-- Featured UMKM Section -->
-        <div class="mt-12">
+        <div class="mt-12" id="tenant-section">
             <TenantList :tenants="tenants" :kategoriTenants="kategoriTenants" />
         </div>
 
@@ -72,7 +74,7 @@ const formatPrice = (price) => {
             <div class="absolute right-20 -bottom-10 h-28 w-28 rounded-full bg-orange-400 opacity-20"></div>
 
             <div class="relative z-10 mb-8 text-center">
-                <h2 class="mb-2 text-2xl font-bold">EXPO UMKM dalam Angka</h2>
+                <h2 class="mb-2 text-2xl font-bold">EXPO UMKM</h2>
                 <p class="text-muted-foreground">Bersama kita mendukung pertumbuhan UMKM lokal</p>
             </div>
             <div class="relative z-10 grid grid-cols-1 gap-6 md:grid-cols-3">
