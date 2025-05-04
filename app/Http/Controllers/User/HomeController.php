@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\KategoriTenant;
+use App\Models\PreOrder; // Tambahkan model PreOrder
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -33,6 +34,9 @@ class HomeController extends Controller
         // Ambil total tenant untuk statistik
         $totalTenants = Tenant::count();
 
+        // Ambil total orders dari tabel pre_orders
+        $totalOrders = PreOrder::count();
+
         // Ambil kategori untuk filter
         $kategoriTenants = KategoriTenant::orderBy('nama_kategori', 'asc')
             ->get()
@@ -48,7 +52,10 @@ class HomeController extends Controller
             'kategoriTenants' => $kategoriTenants,
             'stats' => [
                 'totalTenants' => $totalTenants,
-                // Tambahkan statistik lain jika diperlukan
+                'totalOrders' => $totalOrders, // Tambahkan total orders
+            ],
+            'flash' => [
+                'order_success' => session('order_success')
             ]
         ]);
     }

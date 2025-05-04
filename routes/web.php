@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\KategoriTenantController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\TenantController;
+use App\Http\Controllers\User\PreOrderController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -16,6 +17,7 @@ use function Pest\Laravel\get;
 Route::get('/', [HomeController::class, 'showHomeView'])->name('home');
 Route::get('/about', [AboutusController::class, 'showAboutusView'])->name('about');
 Route::get('/tenant/{id}', [HomeController::class, 'showTenantDetail'])->name('tenant.detail');
+Route::post('/pre-order', [PreOrderController::class, 'InsertPreOrder'])->name('pre-order.insert');
 
 Route::get('/login', [AuthController::class, 'showLogin'])
     ->name('login');

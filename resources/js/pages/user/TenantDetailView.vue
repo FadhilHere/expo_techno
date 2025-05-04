@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import UserLayout from '@/layouts/UserLayout.vue';
-import { computed, ref, onMounted } from 'vue';
+import { useForm } from '@inertiajs/vue3';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
+import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps({
     tenant: Object,
@@ -11,10 +12,15 @@ const props = defineProps({
 // Order state
 const orderItems = ref([]);
 const showOrderModal = ref(false);
-const orderForm = ref({
+const orderInProgress = ref(false);
+
+// Order form using Inertia form
+const orderForm = useForm({
+    tenant_id: props.tenant.id,
     nama_pemesan: '',
-    nomor_pemesan: '',
-    catatan: ''
+    nomor_wa: '',
+    catatan_tambahan: '',
+    items: [],
 });
 
 // Format harga ke format rupiah
@@ -43,68 +49,61 @@ const whatsappLink = computed(() => {
 
 // Order methods
 const addToOrder = (product) => {
-    const existingItem = orderItems.value.find(item => item.id === product.id);
+    const existingItem = orderItems.value.find((item) => item.id === product.id);
 
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
         orderItems.value.push({
             ...product,
-            quantity: 1
+            quantity: 1,
         });
     }
 };
 
 const removeFromOrder = (product) => {
-    const existingItem = orderItems.value.find(item => item.id === product.id);
+    const existingItem = orderItems.value.find((item) => item.id === product.id);
 
     if (existingItem) {
         if (existingItem.quantity > 1) {
             existingItem.quantity -= 1;
         } else {
-            orderItems.value = orderItems.value.filter(item => item.id !== product.id);
+            orderItems.value = orderItems.value.filter((item) => item.id !== product.id);
         }
     }
 };
 
 const getProductQuantity = (productId) => {
-    const item = orderItems.value.find(item => item.id === productId);
+    const item = orderItems.value.find((item) => item.id === productId);
     return item ? item.quantity : 0;
 };
 
 const totalPrice = computed(() => {
     return orderItems.value.reduce((total, item) => {
-        return total + (item.harga * item.quantity);
+        return total + item.harga * item.quantity;
     }, 0);
 });
 
 const submitOrder = () => {
-    // Create order message for WhatsApp
-    let message = `*Order dari ${orderForm.value.nama_pemesan}*\n\n`;
-    message += `Nomor Pemesan: ${orderForm.value.nomor_pemesan}\n\n`;
-    message += `*Daftar Produk:*\n`;
+    // Prepare form data
+    orderForm.items = orderItems.value.map((item) => ({
+        id: item.id,
+        quantity: item.quantity,
+    }));
 
-    orderItems.value.forEach(item => {
-        message += `${item.nama_produk} - ${item.quantity}x ${formatPrice(item.harga)}\n`;
+    orderInProgress.value = true;
+
+    // Submit using Inertia
+    orderForm.post('/pre-order', {
+        onSuccess: () => {
+            orderItems.value = [];
+            orderForm.reset();
+            showOrderModal.value = false;
+        },
+        onFinish: () => {
+            orderInProgress.value = false;
+        },
     });
-
-    message += `\n*Total: ${formatPrice(totalPrice.value)}*\n\n`;
-    if (orderForm.value.catatan) {
-        message += `Catatan: ${orderForm.value.catatan}`;
-    }
-
-    // Encode message and open WhatsApp
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`${whatsappLink.value}&text=${encodedMessage}`, '_blank');
-
-    // Reset form
-    showOrderModal.value = false;
-    orderItems.value = [];
-    orderForm.value = {
-        nama_pemesan: '',
-        nomor_pemesan: '',
-        catatan: ''
-    };
 };
 
 // Function untuk membatasi teks deskripsi
@@ -135,7 +134,7 @@ onMounted(() => {
                         if (truncatedText === product.deskripsi) {
                             return false;
                         }
-                    }
+                    },
                 });
             }
         });
@@ -158,6 +157,50 @@ onMounted(() => {
                     </svg>
                     Kembali ke Home
                 </a>
+            </div>
+
+            <!-- Success Alert -->
+            <div v-if="orderSuccess" class="rounded-lg bg-green-50 p-4 text-green-800">
+                <div class="flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <h3 class="font-semibold">Pesanan Berhasil Dibuat!</h3>
+                        <div class="mt-1 text-sm">Terima kasih telah memesan. Detail pesanan telah dikirim ke WhatsApp penjual.</div>
+                        <div class="mt-3">
+                            <button
+                                @click="orderSuccess = false"
+                                class="rounded-lg bg-green-100 px-3 py-1.5 text-sm font-medium text-green-800 hover:bg-green-200"
+                            >
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Alert -->
+            <div v-if="orderError" class="rounded-lg bg-red-50 p-4 text-red-800">
+                <div class="flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <h3 class="font-semibold">Terjadi Kesalahan</h3>
+                        <div class="mt-1 text-sm">
+                            {{ orderError }}
+                        </div>
+                        <div class="mt-3">
+                            <button
+                                @click="orderError = null"
+                                class="rounded-lg bg-red-100 px-3 py-1.5 text-sm font-medium text-red-800 hover:bg-red-200"
+                            >
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Tenant Profile Section -->
@@ -221,7 +264,7 @@ onMounted(() => {
                         <div
                             v-for="item in orderItems"
                             :key="item.id"
-                            class="flex items-center justify-between border-b border-gray-100 last:border-0 pb-4 last:pb-0"
+                            class="flex items-center justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0"
                         >
                             <div class="flex items-center space-x-4">
                                 <img
@@ -286,7 +329,7 @@ onMounted(() => {
                             <p class="mb-2 font-bold text-gray-700">{{ formatPrice(product.harga) }}</p>
 
                             <!-- Description with Tippy Tooltip -->
-                            <p class="product-description mb-4 h-12 overflow-hidden text-sm text-gray-600 cursor-help">
+                            <p class="product-description mb-4 h-12 cursor-help overflow-hidden text-sm text-gray-600">
                                 {{ limitText(product.deskripsi ? product.deskripsi : 'Tidak ada deskripsi produk.') }}
                             </p>
 
@@ -310,7 +353,11 @@ onMounted(() => {
                                         class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-50"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                                            <path
+                                                fill-rule="evenodd"
+                                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                                clip-rule="evenodd"
+                                            />
                                         </svg>
                                     </button>
                                 </div>
@@ -327,7 +374,7 @@ onMounted(() => {
                 </div>
             </div>
 
-            <!-- Order Modal - Updated without dark overlay -->
+            <!-- Order Modal -->
             <div v-if="showOrderModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
                 <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
                     <h2 class="mb-4 text-xl font-bold">Form Pemesanan</h2>
@@ -339,40 +386,58 @@ onMounted(() => {
                                 v-model="orderForm.nama_pemesan"
                                 type="text"
                                 required
-                                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+                                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black focus:outline-none"
                             />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
+                            <label class="block text-sm font-medium text-gray-700">Nomor WhatsApp</label>
                             <input
-                                v-model="orderForm.nomor_pemesan"
+                                v-model="orderForm.nomor_wa"
                                 type="tel"
                                 required
-                                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+                                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black focus:outline-none"
                             />
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Catatan (Opsional)</label>
                             <textarea
-                                v-model="orderForm.catatan"
+                                v-model="orderForm.catatan_tambahan"
                                 rows="3"
-                                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+                                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black focus:outline-none"
                             ></textarea>
                         </div>
 
                         <div class="mt-6 flex space-x-3">
                             <button
                                 type="submit"
-                                class="flex-1 rounded-lg bg-black px-4 py-2 text-white transition-colors hover:bg-gray-800"
+                                class="flex-1 rounded-lg bg-black px-4 py-2 text-white transition-colors hover:bg-gray-800 disabled:opacity-50"
+                                :disabled="orderInProgress"
                             >
-                                Order
+                                <span v-if="orderInProgress">
+                                    <svg
+                                        class="mr-2 h-5 w-5 animate-spin text-white"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path
+                                            class="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                        ></path>
+                                    </svg>
+                                    Memproses...
+                                </span>
+                                <span v-else>Pesan Sekarang</span>
                             </button>
                             <button
                                 type="button"
                                 @click="showOrderModal = false"
                                 class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50"
+                                :disabled="orderInProgress"
                             >
                                 Batal
                             </button>
