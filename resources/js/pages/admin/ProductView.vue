@@ -1,14 +1,5 @@
 <script setup lang="ts">
-import { ref, nextTick, computed } from 'vue'
-import { router } from '@inertiajs/vue3'
-import AuthLayout from '@/layouts/AuthLayout.vue'
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
+import Alert from '@/components/Alert.vue';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -18,114 +9,110 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Plus, Pencil, Trash2, X, ArrowLeft } from 'lucide-vue-next'
-import Alert from '@/components/Alert.vue'
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
+import AuthLayout from '@/layouts/AuthLayout.vue';
+import { router } from '@inertiajs/vue3';
+import { ArrowLeft, Pencil, Plus, Trash2, X } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
 interface Product {
-    id: number
-    nama_produk: string
-    harga: number
-    deskripsi: string
-    foto_produk: string | null
-    foto_produk_url: string
-    tenant_id: number
+    id: number;
+    nama_produk: string;
+    harga: number;
+    deskripsi: string;
+    foto_produk: string | null;
+    foto_produk_url: string;
+    tenant_id: number;
 }
 
 interface Tenant {
-    id: number
-    nama_tenant: string
-    deskripsi: string
-    tahun_expo: string
-    kategori: string
+    id: number;
+    nama_tenant: string;
+    deskripsi: string;
+    tahun_expo: string;
+    kategori: string;
 }
 
 // Props definition
 const props = defineProps<{
-    products: Product[]
-    tenant: Tenant
-}>()
+    products: Product[];
+    tenant: Tenant;
+}>();
 
 // Compute breadcrumb items for dynamic breadcrumb in AuthLayout
 const breadcrumbItems = computed(() => {
     return [
         { label: 'Menu', href: '/' },
         { label: 'Tenant', href: '/admin/tenant' },
-        { label: props.tenant.nama_tenant, href: null }
-    ]
-})
+        { label: props.tenant.nama_tenant, href: null },
+    ];
+});
 
 // State management
-const showDialog = ref(false)
-const dialogMode = ref<'add' | 'edit'>('add')
+const showDialog = ref(false);
+const dialogMode = ref<'add' | 'edit'>('add');
 const formData = ref({
     id: '',
     nama_produk: '',
     harga: '',
     deskripsi: '',
     foto_produk: null as File | null,
-    remove_foto: false
-})
-const fotoPreview = ref<string | null>(null)
+    remove_foto: false,
+});
+const fotoPreview = ref<string | null>(null);
 const alert = ref({
     show: false,
     type: 'success' as 'success' | 'error',
-    message: ''
-})
-const deleteId = ref<number | null>(null)
-const showDeleteDialog = ref(false)
-const validationErrors = ref<Record<string, string>>({})
-const isSubmitting = ref(false)
+    message: '',
+});
+const deleteId = ref<number | null>(null);
+const showDeleteDialog = ref(false);
+const validationErrors = ref<Record<string, string>>({});
+const isSubmitting = ref(false);
 
 const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
-        minimumFractionDigits: 0
-    }).format(price)
-}
+        minimumFractionDigits: 0,
+    }).format(price);
+};
 
 const showAlert = (type: 'success' | 'error', message: string) => {
     alert.value = {
         show: true,
         type,
-        message
-    }
+        message,
+    };
     setTimeout(() => {
-        alert.value.show = false
-    }, 5000) // Otomatis hilang setelah 5 detik
-}
+        alert.value.show = false;
+    }, 5000); // Otomatis hilang setelah 5 detik
+};
 
 // Form handlers
 const openAddDialog = () => {
-    dialogMode.value = 'add'
+    dialogMode.value = 'add';
     formData.value = {
         id: '',
         nama_produk: '',
         harga: '',
         deskripsi: '',
         foto_produk: null,
-        remove_foto: false
-    }
-    fotoPreview.value = null
-    validationErrors.value = {}
-    showDialog.value = true
-}
+        remove_foto: false,
+    };
+    fotoPreview.value = null;
+    validationErrors.value = {};
+    showDialog.value = true;
+};
 
 const openEditDialog = (data: Product) => {
-    dialogMode.value = 'edit'
+    dialogMode.value = 'edit';
 
     // Reset form data first
     formData.value = {
@@ -134,157 +121,157 @@ const openEditDialog = (data: Product) => {
         harga: String(data.harga) || '',
         deskripsi: data.deskripsi || '',
         foto_produk: null,
-        remove_foto: false
-    }
+        remove_foto: false,
+    };
 
-    fotoPreview.value = data.foto_produk_url
-    validationErrors.value = {}
-    showDialog.value = true
-}
+    fotoPreview.value = data.foto_produk_url;
+    validationErrors.value = {};
+    showDialog.value = true;
+};
 
 const confirmDelete = (id: number) => {
-    deleteId.value = id
-    showDeleteDialog.value = true
-}
+    deleteId.value = id;
+    showDeleteDialog.value = true;
+};
 
 const handleFileChange = (event: Event) => {
-    const target = event.target as HTMLInputElement
+    const target = event.target as HTMLInputElement;
     if (target.files && target.files.length > 0) {
-        const file = target.files[0]
-        formData.value.foto_produk = file
-        formData.value.remove_foto = false
+        const file = target.files[0];
+        formData.value.foto_produk = file;
+        formData.value.remove_foto = false;
 
         // Create preview
-        const reader = new FileReader()
+        const reader = new FileReader();
         reader.onload = (e) => {
-            fotoPreview.value = e.target?.result as string
-        }
-        reader.readAsDataURL(file)
+            fotoPreview.value = e.target?.result as string;
+        };
+        reader.readAsDataURL(file);
     }
-}
+};
 
 const removeFoto = () => {
-    formData.value.foto_produk = null
-    formData.value.remove_foto = true
-    fotoPreview.value = null
-}
+    formData.value.foto_produk = null;
+    formData.value.remove_foto = true;
+    fotoPreview.value = null;
+};
 
 const validateForm = () => {
-    const errors: Record<string, string> = {}
+    const errors: Record<string, string> = {};
 
     // Validasi field required
     if (!formData.value.nama_produk || formData.value.nama_produk.trim() === '') {
-        errors.nama_produk = 'Nama produk harus diisi.'
+        errors.nama_produk = 'Nama produk harus diisi.';
     }
 
     if (!formData.value.harga) {
-        errors.harga = 'Harga produk harus diisi.'
+        errors.harga = 'Harga produk harus diisi.';
     } else if (isNaN(Number(formData.value.harga)) || Number(formData.value.harga) < 0) {
-        errors.harga = 'Harga produk harus berupa angka dan tidak boleh negatif.'
+        errors.harga = 'Harga produk harus berupa angka dan tidak boleh negatif.';
     }
 
-    validationErrors.value = errors
-    return Object.keys(errors).length === 0
-}
+    validationErrors.value = errors;
+    return Object.keys(errors).length === 0;
+};
 
 // Handle form submission
 const handleSubmit = () => {
-    if (isSubmitting.value) return
+    if (isSubmitting.value) return;
 
     // Validasi form sebelum mengirim
     if (!validateForm()) {
-        return
+        return;
     }
 
-    isSubmitting.value = true
+    isSubmitting.value = true;
 
     // Penting: apply trim to text fields
-    const namaProdukValue = formData.value.nama_produk.trim()
-    const hargaValue = formData.value.harga
-    const deskripsiValue = formData.value.deskripsi.trim()
+    const namaProdukValue = formData.value.nama_produk.trim();
+    const hargaValue = formData.value.harga;
+    const deskripsiValue = formData.value.deskripsi.trim();
 
     if (dialogMode.value === 'add') {
         // Untuk ADD, gunakan FormData normal
-        const submitData = new FormData()
-        submitData.append('nama_produk', namaProdukValue)
-        submitData.append('harga', hargaValue)
-        submitData.append('deskripsi', deskripsiValue)
+        const submitData = new FormData();
+        submitData.append('nama_produk', namaProdukValue);
+        submitData.append('harga', hargaValue);
+        submitData.append('deskripsi', deskripsiValue);
 
         if (formData.value.foto_produk) {
-            submitData.append('foto_produk', formData.value.foto_produk)
+            submitData.append('foto_produk', formData.value.foto_produk);
         }
 
         router.post(`/admin/tenant/${props.tenant.id}/products`, submitData, {
             onSuccess: () => {
-                showDialog.value = false
-                showAlert('success', 'Produk berhasil ditambahkan')
-                isSubmitting.value = false
+                showDialog.value = false;
+                showAlert('success', 'Produk berhasil ditambahkan');
+                isSubmitting.value = false;
             },
             onError: (errors) => {
-                validationErrors.value = errors
-                showAlert('error', 'Terjadi kesalahan saat menambah produk')
-                isSubmitting.value = false
-                console.error('Validation errors:', errors)
-            }
-        })
+                validationErrors.value = errors;
+                showAlert('error', 'Terjadi kesalahan saat menambah produk');
+                isSubmitting.value = false;
+                console.error('Validation errors:', errors);
+            },
+        });
     } else {
         // Untuk UPDATE
-        const id = formData.value.id
+        const id = formData.value.id;
 
         // Selalu gunakan FormData untuk update agar bisa menangani file
-        const submitData = new FormData()
+        const submitData = new FormData();
 
         // Tambahkan data form
-        submitData.append('nama_produk', namaProdukValue)
-        submitData.append('harga', hargaValue)
-        submitData.append('deskripsi', deskripsiValue)
-        submitData.append('_method', 'PUT') // Tambahkan _method untuk spoofing PUT
+        submitData.append('nama_produk', namaProdukValue);
+        submitData.append('harga', hargaValue);
+        submitData.append('deskripsi', deskripsiValue);
+        submitData.append('_method', 'PUT'); // Tambahkan _method untuk spoofing PUT
 
         // Handle file dan remove_foto
         if (formData.value.foto_produk) {
-            submitData.append('foto_produk', formData.value.foto_produk)
+            submitData.append('foto_produk', formData.value.foto_produk);
         }
 
         // PENTING: Hanya append remove_foto jika nilainya true
         if (formData.value.remove_foto === true) {
-            submitData.append('remove_foto', '1')
+            submitData.append('remove_foto', '1');
         }
 
         // Gunakan router.post dengan _method: 'PUT' untuk file upload
         router.post(`/admin/tenant/${props.tenant.id}/products/${id}`, submitData, {
             onSuccess: () => {
-                showDialog.value = false
-                showAlert('success', 'Produk berhasil diupdate')
-                isSubmitting.value = false
+                showDialog.value = false;
+                showAlert('success', 'Produk berhasil diupdate');
+                isSubmitting.value = false;
             },
             onError: (errors) => {
-                validationErrors.value = errors
-                showAlert('error', 'Terjadi kesalahan saat update produk')
-                isSubmitting.value = false
-                console.error('Validation errors on update:', errors)
-            }
-        })
+                validationErrors.value = errors;
+                showAlert('error', 'Terjadi kesalahan saat update produk');
+                isSubmitting.value = false;
+                console.error('Validation errors on update:', errors);
+            },
+        });
     }
-}
+};
 
 const handleDelete = () => {
-    if (deleteId.value === null) return
+    if (deleteId.value === null) return;
 
     router.delete(`/admin/tenant/${props.tenant.id}/products/${deleteId.value}`, {
         onSuccess: () => {
-            showDeleteDialog.value = false
-            showAlert('success', 'Produk berhasil dihapus')
+            showDeleteDialog.value = false;
+            showAlert('success', 'Produk berhasil dihapus');
         },
         onError: () => {
-            showDeleteDialog.value = false
-            showAlert('error', 'Gagal menghapus produk')
-        }
-    })
-}
+            showDeleteDialog.value = false;
+            showAlert('error', 'Gagal menghapus produk');
+        },
+    });
+};
 
 const backToTenants = () => {
-    router.visit('/admin/tenant')
-}
+    router.visit('/admin/tenant');
+};
 </script>
 
 <template>
@@ -295,7 +282,7 @@ const backToTenants = () => {
     >
         <div class="space-y-6">
             <!-- Back button and title -->
-            <div class="flex justify-between items-center mb-6">
+            <div class="mb-6 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <Button variant="outline" size="icon" @click="backToTenants">
                         <ArrowLeft class="h-4 w-4" />
@@ -303,34 +290,34 @@ const backToTenants = () => {
                     <h1 class="text-2xl font-bold">Produk {{ tenant.nama_tenant }}</h1>
                 </div>
                 <Button @click="openAddDialog">
-                    <Plus class="w-4 h-4 mr-2" />
+                    <Plus class="mr-2 h-4 w-4" />
                     Tambah Produk
                 </Button>
             </div>
 
             <!-- Tenant info card -->
             <div class="bg-card rounded-lg p-4 shadow">
-                <h2 class="font-semibold text-lg mb-2">Informasi Tenant</h2>
+                <h2 class="mb-2 text-lg font-semibold">Informasi Tenant</h2>
 
                 <!-- Grid untuk informasi dasar (3 kolom) -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                <div class="mb-3 grid grid-cols-1 gap-4 md:grid-cols-3">
                     <div>
-                        <p class="text-sm text-muted-foreground">Nama Tenant</p>
+                        <p class="text-muted-foreground text-sm">Nama Tenant</p>
                         <p>{{ tenant.nama_tenant }}</p>
                     </div>
                     <div>
-                        <p class="text-sm text-muted-foreground">Tahun Expo</p>
+                        <p class="text-muted-foreground text-sm">Tahun Expo</p>
                         <p>{{ tenant.tahun_expo }}</p>
                     </div>
                     <div>
-                        <p class="text-sm text-muted-foreground">Kategori</p>
+                        <p class="text-muted-foreground text-sm">Kategori</p>
                         <p>{{ tenant.kategori }}</p>
                     </div>
                 </div>
 
                 <!-- Deskripsi tenant (1 baris penuh) -->
                 <div v-if="tenant.deskripsi" class="mt-2">
-                    <p class="text-sm text-muted-foreground">Deskripsi</p>
+                    <p class="text-muted-foreground text-sm">Deskripsi</p>
                     <p class="mt-1">{{ tenant.deskripsi }}</p>
                 </div>
             </div>
@@ -351,11 +338,7 @@ const backToTenants = () => {
                     <TableRow v-for="(item, index) in products" :key="item.id">
                         <TableCell>{{ index + 1 }}</TableCell>
                         <TableCell>
-                            <img
-                                :src="item.foto_produk_url"
-                                alt="Foto Produk"
-                                class="w-16 h-16 object-cover rounded"
-                            />
+                            <img :src="item.foto_produk_url" alt="Foto Produk" class="h-16 w-16 rounded object-cover" />
                         </TableCell>
                         <TableCell>{{ item.nama_produk }}</TableCell>
                         <TableCell>{{ formatPrice(item.harga) }}</TableCell>
@@ -363,10 +346,10 @@ const backToTenants = () => {
                         <TableCell>
                             <div class="flex space-x-2">
                                 <Button variant="outline" size="icon" @click="openEditDialog(item)">
-                                    <Pencil class="w-4 h-4" />
+                                    <Pencil class="h-4 w-4" />
                                 </Button>
                                 <Button variant="destructive" size="icon" @click="confirmDelete(item.id)">
-                                    <Trash2 class="w-4 h-4" />
+                                    <Trash2 class="h-4 w-4" />
                                 </Button>
                             </div>
                         </TableCell>
@@ -374,7 +357,7 @@ const backToTenants = () => {
                 </TableBody>
             </Table>
 
-            <div v-else class="text-center py-8">
+            <div v-else class="py-8 text-center">
                 <p class="text-muted-foreground">Belum ada produk untuk tenant ini. Klik 'Tambah Produk' untuk mulai menambahkan produk.</p>
             </div>
 
@@ -397,9 +380,9 @@ const backToTenants = () => {
                                 v-model="formData.nama_produk"
                                 type="text"
                                 required
-                                :class="{'border-red-500 focus:ring-red-500': validationErrors.nama_produk}"
+                                :class="{ 'border-red-500 focus:ring-red-500': validationErrors.nama_produk }"
                             />
-                            <p v-if="validationErrors.nama_produk" class="text-red-500 text-xs mt-1">
+                            <p v-if="validationErrors.nama_produk" class="mt-1 text-xs text-red-500">
                                 {{ validationErrors.nama_produk }}
                             </p>
                         </div>
@@ -412,9 +395,9 @@ const backToTenants = () => {
                                 type="number"
                                 min="0"
                                 required
-                                :class="{'border-red-500 focus:ring-red-500': validationErrors.harga}"
+                                :class="{ 'border-red-500 focus:ring-red-500': validationErrors.harga }"
                             />
-                            <p v-if="validationErrors.harga" class="text-red-500 text-xs mt-1">
+                            <p v-if="validationErrors.harga" class="mt-1 text-xs text-red-500">
                                 {{ validationErrors.harga }}
                             </p>
                         </div>
@@ -425,9 +408,9 @@ const backToTenants = () => {
                                 id="deskripsi"
                                 v-model="formData.deskripsi"
                                 rows="3"
-                                :class="{'border-red-500 focus:ring-red-500': validationErrors.deskripsi}"
+                                :class="{ 'border-red-500 focus:ring-red-500': validationErrors.deskripsi }"
                             />
-                            <p v-if="validationErrors.deskripsi" class="text-red-500 text-xs mt-1">
+                            <p v-if="validationErrors.deskripsi" class="mt-1 text-xs text-red-500">
                                 {{ validationErrors.deskripsi }}
                             </p>
                         </div>
@@ -438,17 +421,13 @@ const backToTenants = () => {
                             <!-- Foto Preview -->
                             <div v-if="fotoPreview" class="mt-2 mb-3">
                                 <div class="relative inline-block">
-                                    <img
-                                        :src="fotoPreview"
-                                        alt="Foto Preview"
-                                        class="w-32 h-32 object-cover rounded border"
-                                    />
+                                    <img :src="fotoPreview" alt="Foto Preview" class="h-32 w-32 rounded border object-cover" />
                                     <button
                                         type="button"
                                         @click="removeFoto"
-                                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none"
+                                        class="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600 focus:outline-none"
                                     >
-                                        <X class="w-4 h-4" />
+                                        <X class="h-4 w-4" />
                                     </button>
                                 </div>
                             </div>
@@ -460,27 +439,30 @@ const backToTenants = () => {
                                 accept="image/*"
                                 @change="handleFileChange"
                                 class="mt-1"
-                                :class="{'border-red-500 focus:ring-red-500': validationErrors.foto_produk}"
+                                :class="{ 'border-red-500 focus:ring-red-500': validationErrors.foto_produk }"
                             />
-                            <p v-if="validationErrors.foto_produk" class="text-red-500 text-xs mt-1">
+                            <p v-if="validationErrors.foto_produk" class="mt-1 text-xs text-red-500">
                                 {{ validationErrors.foto_produk }}
                             </p>
-                            <p class="text-xs text-gray-500 mt-1">Ukuran maksimal 2MB. Format: JPG, PNG, GIF</p>
+                            <p class="mt-1 text-xs text-gray-500">Ukuran maksimal 5MB. Format: JPG, PNG, GIF</p>
                         </div>
 
                         <div class="flex justify-end space-x-2">
-                            <Button type="button" variant="outline" @click="showDialog = false">
-                                Batal
-                            </Button>
-                            <Button
-                                type="submit"
-                                :disabled="isSubmitting"
-                                :class="{'opacity-75 cursor-not-allowed': isSubmitting}"
-                            >
+                            <Button type="button" variant="outline" @click="showDialog = false"> Batal </Button>
+                            <Button type="submit" :disabled="isSubmitting" :class="{ 'cursor-not-allowed opacity-75': isSubmitting }">
                                 <template v-if="isSubmitting">
-                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <svg
+                                        class="mr-2 -ml-1 h-4 w-4 animate-spin text-white"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        <path
+                                            class="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                        ></path>
                                     </svg>
                                     Processing...
                                 </template>
@@ -499,23 +481,20 @@ const backToTenants = () => {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Apakah Anda yakin ingin menghapus produk ini?
-                            Tindakan ini tidak dapat dibatalkan dan akan menghapus data secara permanen.
+                            Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan dan akan menghapus data secara permanen.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel @click="showDeleteDialog = false">Batal</AlertDialogCancel>
-                        <AlertDialogAction @click="handleDelete" class="bg-destructive text-destructive-foreground hover:bg-destructive/90">Hapus</AlertDialogAction>
+                        <AlertDialogAction @click="handleDelete" class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >Hapus</AlertDialogAction
+                        >
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
 
             <!-- Alert Notification -->
-            <Alert
-                v-model:show="alert.show"
-                :type="alert.type"
-                :message="alert.message"
-            />
+            <Alert v-model:show="alert.show" :type="alert.type" :message="alert.message" />
         </div>
     </AuthLayout>
 </template>

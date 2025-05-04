@@ -2,46 +2,66 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AuthLayout from '@/layouts/AuthLayout.vue';
-import { Activity, DollarSign, ShoppingCart, Users } from 'lucide-vue-next';
+import { Calendar, DollarSign, ShoppingCart, Store } from 'lucide-vue-next';
 
-// Props dari controller
+// Function untuk memformat currency
+const formatCurrency = (value) => {
+    // Pastikan nilai adalah angka
+    const number = parseFloat(value);
+
+    // Cek apakah angka valid
+    if (isNaN(number)) {
+        return value;
+    }
+
+    // Format sebagai mata uang Indonesia (Rupiah)
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }).format(number);
+};
+
+// Props dari controller - dengan tambahan data statistik
 const props = defineProps({
     recentOrders: Array,
+    dashboardStats: Object, // Tambahan data statistik
 });
 
-// Data untuk stat cards
+// Data untuk stat cards dengan data dinamis dari controller
 const stats = [
     {
-        title: 'Total Revenue',
-        value: '$45,231.89',
+        title: 'Total Pendapatan',
+        value: formatCurrency(props.dashboardStats?.totalRevenue || 0),
         icon: DollarSign,
-        change: '+20.1%',
-        trend: 'up',
+        change: props.dashboardStats?.revenueChange + '%',
+        trend: props.dashboardStats?.revenueChange >= 0 ? 'up' : 'down',
     },
     {
-        title: 'New Users',
-        value: '2,350',
-        icon: Users,
-        change: '+10.5%',
-        trend: 'up',
+        title: 'Total Tenant Aktif',
+        value: props.dashboardStats?.activeTenants || 0,
+        icon: Store,
+        change: props.dashboardStats?.tenantChange + '%',
+        trend: props.dashboardStats?.tenantChange >= 0 ? 'up' : 'down',
     },
     {
-        title: 'Orders',
-        value: '1,247',
+        title: 'Total Pesanan',
+        value: props.dashboardStats?.totalOrders || 0,
         icon: ShoppingCart,
-        change: '+12.2%',
-        trend: 'up',
+        change: props.dashboardStats?.orderChange + '%',
+        trend: props.dashboardStats?.orderChange >= 0 ? 'up' : 'down',
     },
     {
-        title: 'Active Sessions',
-        value: '573',
-        icon: Activity,
-        change: '-2.5%',
-        trend: 'down',
+        title: 'Pesanan Hari Ini',
+        value: props.dashboardStats?.todayOrders || 0,
+        icon: Calendar,
+        change: props.dashboardStats?.todayOrderChange + '%',
+        trend: props.dashboardStats?.todayOrderChange >= 0 ? 'up' : 'down',
     },
 ];
 
-// Function untuk memformat status pesanan - DIPERBARUI
+// Function untuk memformat status pesanan
 const getStatusBadge = (status) => {
     switch (status) {
         case 'pending':
@@ -94,25 +114,6 @@ const formatDate = (dateString) => {
         minute: '2-digit',
     });
 };
-
-// Function untuk memformat currency
-const formatCurrency = (value) => {
-    // Pastikan nilai adalah angka
-    const number = parseFloat(value);
-
-    // Cek apakah angka valid
-    if (isNaN(number)) {
-        return value;
-    }
-
-    // Format sebagai mata uang Indonesia (Rupiah)
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-    }).format(number);
-};
 </script>
 
 <template>
@@ -126,12 +127,12 @@ const formatCurrency = (value) => {
                 </CardHeader>
                 <CardContent>
                     <div class="text-2xl font-bold">{{ stat.value }}</div>
-                    <p class="text-muted-foreground mt-1 flex items-center text-xs">
+                    <!-- <p class="text-muted-foreground mt-1 flex items-center text-xs">
                         <span :class="stat.trend === 'up' ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400'">
                             {{ stat.change }}
                         </span>
-                        <span class="ml-1">from last month</span>
-                    </p>
+                        <span class="ml-1">dari bulan lalu</span>
+                    </p> -->
                 </CardContent>
             </Card>
         </div>
@@ -163,7 +164,6 @@ const formatCurrency = (value) => {
                             <TableCell>{{ order.nomor_wa }}</TableCell>
                             <TableCell>{{ formatCurrency(order.total) }}</TableCell>
                             <TableCell>
-                                <!-- Menggunakan span dengan class sesuai status (seperti di PreOrderView) -->
                                 <span :class="`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(order.status_pesanan)}`">
                                     {{ getStatusText(order.status_pesanan) }}
                                 </span>
