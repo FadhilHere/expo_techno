@@ -7,7 +7,7 @@ import NavSimple from '@/components/NavSimple.vue';
 import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroupLabel, SidebarHeader, SidebarRail, useSidebar } from '@/components/ui/sidebar';
 
-import { PieChart, Square, Store, TimerIcon } from 'lucide-vue-next';
+import { PieChart, ShoppingCart, Square, Store, TimerIcon } from 'lucide-vue-next';
 
 const props = withDefaults(defineProps<SidebarProps>(), {
     collapsible: 'icon',
@@ -42,6 +42,11 @@ const data = {
             title: 'Tenant',
             url: '/admin/tenant',
             icon: Store,
+        },
+        {
+            title: 'Pre-Order',
+            url: '/admin/pre-orders',
+            icon: ShoppingCart, // Make sure to import ShoppingCart from lucide-vue-next
         },
     ],
     //   navMain: [

@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AuthLayout from '@/layouts/AuthLayout.vue';
-// import { formatCurrency } from '@/lib/utils'; // Asumsi Anda memiliki utility function ini
 import { Activity, DollarSign, ShoppingCart, Users } from 'lucide-vue-next';
 
 // Props dari controller
@@ -43,19 +41,45 @@ const stats = [
     },
 ];
 
-// Function untuk memformat status pesanan
+// Function untuk memformat status pesanan - DIPERBARUI
 const getStatusBadge = (status) => {
     switch (status) {
         case 'pending':
             return { variant: 'warning', label: 'Pending' };
-        case 'processing':
-            return { variant: 'secondary', label: 'Diproses' };
-        case 'completed':
-            return { variant: 'success', label: 'Selesai' };
-        case 'cancelled':
-            return { variant: 'destructive', label: 'Dibatalkan' };
+        case 'confirmed':
+            return { variant: 'success', label: 'Confirmed' };
+        case 'canceled':
+            return { variant: 'destructive', label: 'Canceled' };
         default:
             return { variant: 'outline', label: status };
+    }
+};
+
+// Function untuk mendapatkan class berdasarkan status
+const getStatusColor = (status) => {
+    switch (status) {
+        case 'pending':
+            return 'bg-yellow-100 text-yellow-800';
+        case 'confirmed':
+            return 'bg-green-100 text-green-800';
+        case 'canceled':
+            return 'bg-red-100 text-red-800';
+        default:
+            return 'bg-gray-100 text-gray-800';
+    }
+};
+
+// Function untuk memformat status text
+const getStatusText = (status) => {
+    switch (status) {
+        case 'pending':
+            return 'Pending';
+        case 'confirmed':
+            return 'Confirmed';
+        case 'canceled':
+            return 'Canceled';
+        default:
+            return status;
     }
 };
 
@@ -139,9 +163,10 @@ const formatCurrency = (value) => {
                             <TableCell>{{ order.nomor_wa }}</TableCell>
                             <TableCell>{{ formatCurrency(order.total) }}</TableCell>
                             <TableCell>
-                                <Badge :variant="getStatusBadge(order.status_pesanan).variant">
-                                    {{ getStatusBadge(order.status_pesanan).label }}
-                                </Badge>
+                                <!-- Menggunakan span dengan class sesuai status (seperti di PreOrderView) -->
+                                <span :class="`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(order.status_pesanan)}`">
+                                    {{ getStatusText(order.status_pesanan) }}
+                                </span>
                             </TableCell>
                         </TableRow>
                         <!-- Tampilkan pesan jika tidak ada order -->

@@ -1,23 +1,26 @@
 <script setup lang="ts">
-import { watch } from 'vue'
+import { watch } from 'vue';
 
 const props = defineProps<{
-    type: 'success' | 'error'
-    message: string
-    show: boolean
-}>()
+    type: 'success' | 'error';
+    message: string;
+    show: boolean;
+}>();
 
 const emit = defineEmits<{
-    (e: 'update:show', value: boolean): void
-}>()
+    (e: 'update:show', value: boolean): void;
+}>();
 
-watch(() => props.show, (newVal) => {
-    if (newVal) {
-        setTimeout(() => {
-            emit('update:show', false)
-        }, 3000)
-    }
-})
+watch(
+    () => props.show,
+    (newVal) => {
+        if (newVal) {
+            setTimeout(() => {
+                emit('update:show', false);
+            }, 3000);
+        }
+    },
+);
 </script>
 
 <template>
@@ -31,10 +34,7 @@ watch(() => props.show, (newVal) => {
     >
         <div
             v-if="show"
-            :class="[
-        'fixed top-4 right-4 p-4 rounded-lg shadow-lg',
-        type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-      ]"
+            :class="['fixed top-4 right-4 rounded-lg p-4 shadow-lg', type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800']"
         >
             {{ message }}
         </div>

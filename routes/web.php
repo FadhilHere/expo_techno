@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\KategoriTenantController;
+use App\Http\Controllers\Admin\PreOrderAdminController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\TenantController;
 use App\Http\Controllers\User\PreOrderController;
@@ -51,6 +52,10 @@ Route::middleware(['isLogin'])->prefix('admin')->group(function () {
     Route::post('/tenant/{tenantId}/products', [ProductController::class, 'insertProduct'])->name('tenant.products.insert');
     Route::put('/tenant/{tenantId}/products/{productId}', [ProductController::class, 'updateProduct'])->name('tenant.products.update');
     Route::delete('/tenant/{tenantId}/products/{productId}', [ProductController::class, 'deleteProduct'])->name('tenant.products.delete');
+    // PreOrder Routes
+    Route::get('/pre-orders', [PreOrderAdminController::class, 'showPreOrders'])->name('pre-orders');
+    Route::put('/pre-orders/{id}/status', [PreOrderAdminController::class, 'updatePreOrderStatus'])->name('pre-orders.status.update');
+    Route::delete('/pre-orders/{id}', [PreOrderAdminController::class, 'deletePreOrder'])->name('pre-orders.delete');
 });
 
 require __DIR__ . '/settings.php';
