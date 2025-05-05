@@ -13,7 +13,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/c
 import { router } from '@inertiajs/vue3';
 import { ChevronsUpDown, LogOut } from 'lucide-vue-next';
 
-const props = defineProps<{
+defineProps<{
     user: {
         name: string;
         email: string;

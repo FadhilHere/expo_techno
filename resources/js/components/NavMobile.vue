@@ -1,20 +1,19 @@
 <script setup lang="ts">
-import { Home, Info, ShoppingCart, Store, TimerIcon, PieChart, Square } from 'lucide-vue-next';
-import { cn } from '@/lib/utils';
-import { useRouter } from 'vue-router';
 import { computed } from 'vue';
 
-const props = defineProps({
-    items: {
-        type: Array,
-        required: true,
-    },
-});
+// Define interface for navigation items
+interface NavItem {
+    title: string;
+    url: string;
+    icon: any; // Icon component from lucide-vue-next
+}
 
-const router = useRouter();
+defineProps<{
+    items: NavItem[];
+}>();
 
-// Get the current route to highlight active link
-const currentRoute = computed(() => router.currentRoute.value.path);
+// Get current path for active state highlighting
+const currentPath = computed(() => window.location.pathname);
 </script>
 
 <template>
@@ -24,14 +23,14 @@ const currentRoute = computed(() => router.currentRoute.value.path);
                 <a
                     :href="item.url"
                     :class="[
-                        'text-sidebar-foreground hover:bg-sidebar-hover group flex items-center gap-3 rounded-lg px-3 py-2 transition-colors',
-                        currentRoute === item.url ? 'bg-sidebar-hover font-medium' : ''
+                        'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800',
+                        currentPath === item.url ? 'bg-gray-100 dark:bg-gray-800 font-medium' : ''
                     ]"
                 >
                     <component
                         :is="item.icon"
-                        class="size-5"
-                        :class="currentRoute === item.url ? 'text-primary' : ''"
+                        class="h-5 w-5"
+                        :class="currentPath === item.url ? 'text-primary' : ''"
                     />
                     <span>{{ item.title }}</span>
                 </a>

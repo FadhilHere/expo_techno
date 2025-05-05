@@ -248,11 +248,18 @@ const updateOrderStatus = () => {
 
             // Update the status in the current list without refreshing
             if (selectedOrder.value) {
-                const index = props.preOrders.findIndex((order) => order.id === selectedOrder.value.id);
+                const orderId = selectedOrder.value.id;
+                const index = props.preOrders.findIndex((order) => order.id === orderId);
                 if (index !== -1) {
-                    props.preOrders[index].status_pesanan = selectedDetailStatus.value;
+                    // Create a copy of the order to avoid mutating props directly
+                    const updatedOrders = [...props.preOrders];
+                    updatedOrders[index] = {
+                        ...props.preOrders[index],
+                        status_pesanan: selectedDetailStatus.value
+                    };
+                    // Update local reference
+                    selectedOrder.value.status_pesanan = selectedDetailStatus.value;
                 }
-                selectedOrder.value.status_pesanan = selectedDetailStatus.value;
             }
 
             showAlert('success', 'Status pesanan berhasil diubah');

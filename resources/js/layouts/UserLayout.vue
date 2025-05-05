@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import AppNavbar from '@/components/AppNavbar.vue';
-import { computed, onMounted, ref } from 'vue';
+import NavMobile from '@/components/NavMobile.vue';
+import { onMounted, ref } from 'vue';
 import { Head } from '@inertiajs/vue3';
-import { Moon, Sun, Menu } from 'lucide-vue-next';
-import { Button } from '@/components/ui/button';
+import { Menu, Home, Info } from 'lucide-vue-next';
 import { useMediaQuery } from '@vueuse/core';
 
 // Props untuk title dan description
-const props = defineProps({
+defineProps({
     title: {
         type: String,
         default: 'Welcome',
@@ -41,15 +41,8 @@ onMounted(() => {
     }
 });
 
-// Toggle theme function
-const toggleTheme = () => {
-    theme.value = theme.value === 'light' ? 'dark' : 'light';
-    applyTheme(theme.value);
-    localStorage.setItem('theme', theme.value);
-};
-
 // Apply theme to document
-const applyTheme = (newTheme) => {
+const applyTheme = (newTheme: string) => {
     if (newTheme === 'dark') {
         document.documentElement.classList.add('dark');
     } else {
@@ -60,16 +53,15 @@ const applyTheme = (newTheme) => {
 // Toggle sidebar for mobile
 const toggleMobileSidebar = () => {
     mobileSidebarOpen.value = !mobileSidebarOpen.value;
-    // console.log('Mobile sidebar toggled:', mobileSidebarOpen.value);
 };
 
 // Current year for footer
 const currentYear = new Date().getFullYear();
 
-// Navigation items for mobile sidebar
+// Navigation items for mobile sidebar with icons
 const navItems = [
-    { title: 'Home', url: '/' },
-    { title: 'About Us', url: '/about' },
+    { title: 'Home', url: '/', icon: Home },
+    { title: 'About Us', url: '/about', icon: Info },
 ];
 </script>
 
@@ -121,43 +113,8 @@ const navItems = [
                 </div>
             </div>
 
-            <!-- Navigation -->
-            <nav class="p-4">
-                <ul class="space-y-2">
-                    <li v-for="(item, index) in navItems" :key="index">
-                        <a
-                            :href="item.url"
-                            class="flex items-center px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-                        >
-                            <span>{{ item.title }}</span>
-                        </a>
-                    </li>
-                </ul>
-
-                <!-- Theme Toggle (Commented out as requested) -->
-                <!--
-                <div class="mt-6">
-                    <button
-                        @click="toggleTheme"
-                        class="flex items-center w-full px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                        <Sun v-if="theme === 'dark'" class="mr-2 h-5 w-5" />
-                        <Moon v-else class="mr-2 h-5 w-5" />
-                        <span>{{ theme === 'light' ? 'Dark Mode' : 'Light Mode' }}</span>
-                    </button>
-                </div>
-                -->
-
-                <!-- Dark Mode button instead of toggle -->
-                <!-- <div class="mt-6">
-                    <button
-                        class="flex items-center w-full px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                        <Moon class="mr-2 h-5 w-5" />
-                        <span>Dark Mode</span>
-                    </button>
-                </div> -->
-            </nav>
+            <!-- Navigation using NavMobile component -->
+            <NavMobile :items="navItems" />
         </div>
 
         <!-- Main content -->

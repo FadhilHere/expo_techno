@@ -14,7 +14,7 @@ const props = defineProps({
 const descriptionRef = ref(null);
 
 // Function untuk membatasi teks deskripsi
-const limitText = (text, limit = 100) => {
+const limitText = (text: string, limit = 100) => {
     if (!text) return '';
     return text.length > limit ? text.substring(0, limit) + '...' : text;
 };
@@ -32,7 +32,7 @@ onMounted(() => {
             allowHTML: true,
             interactive: true,
             // Custom styling untuk tooltip
-            onShow(instance) {
+            onShow() {
                 // Hanya tampilkan tooltip jika teks sudah dipotong
                 const truncatedText = limitText(props.tenant.deskripsi || '', 100);
                 if (truncatedText === props.tenant.deskripsi) {
@@ -53,7 +53,7 @@ const tenantInitials = computed(() => {
     if (!props.tenant.nama_tenant) return '';
     return props.tenant.nama_tenant
         .split(' ')
-        .map((word) => word[0])
+        .map((word: string) => word[0])
         .join('')
         .toUpperCase()
         .substring(0, 2);
@@ -72,7 +72,7 @@ const initialsBgColor = computed(() => {
     ];
 
     // Menggunakan string hash sederhana untuk memilih warna
-    const hash = props.tenant.nama_tenant.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const hash = props.tenant.nama_tenant.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
 
     return colors[hash % colors.length];
 });
@@ -94,8 +94,9 @@ const kategoriBadgeStyle = computed(() => {
     };
 
     // Cek apakah kategori memiliki style khusus
-    if (specificStyles[props.tenant.kategori]) {
-        return specificStyles[props.tenant.kategori];
+    const kategori = props.tenant.kategori as string;
+    if (kategori && kategori in specificStyles) {
+        return specificStyles[kategori as keyof typeof specificStyles];
     }
 
     // Untuk kategori lain, gunakan sistem warna yang lebih beragam
@@ -119,7 +120,7 @@ const kategoriBadgeStyle = computed(() => {
     ];
 
     // Membuat hash dari nama kategori
-    const hash = props.tenant.kategori.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const hash = props.tenant.kategori.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
 
     // Memilih warna berdasarkan hash
     const selectedColor = colorStyles[hash % colorStyles.length];

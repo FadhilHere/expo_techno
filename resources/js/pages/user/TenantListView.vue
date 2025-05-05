@@ -2,21 +2,25 @@
 import TenantCard from '@/components/TenantCard.vue';
 import { computed, ref } from 'vue';
 
+// Define interfaces
+interface Tenant {
+    id: number;
+    kategori?: string;
+    nama_tenant: string;
+    [key: string]: any;
+}
+
+interface KategoriTenant {
+    id: number;
+    nama_kategori: string;
+}
+
 // Props dari parent component
-const props = defineProps({
-    tenants: {
-        type: Array,
-        required: true,
-    },
-    kategoriTenants: {
-        type: Array,
-        required: true,
-    },
-    showAllLink: {
-        type: Boolean,
-        default: true,
-    },
-});
+const props = defineProps<{
+    tenants: Tenant[];
+    kategoriTenants: KategoriTenant[];
+    showAllLink?: boolean;
+}>();
 
 // State untuk filter (jika diperlukan di home)
 const selectedKategori = ref('');

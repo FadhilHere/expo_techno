@@ -13,7 +13,9 @@
         "@eslint/js": "^9.19.0",
         "@tailwindcss/vite": "^4.1.4",
         "@types/node": "^22.13.5",
+        "@vue/babel-plugin-jsx": "^1.4.0",
         "@vue/eslint-config-typescript": "^14.3.0",
+        "@vue/runtime-dom": "^3.5.13",
         "eslint": "^9.17.0",
         "eslint-config-prettier": "^10.0.1",
         "eslint-plugin-vue": "^9.32.0",
@@ -21,7 +23,7 @@
         "prettier-plugin-organize-imports": "^4.1.0",
         "prettier-plugin-tailwindcss": "^0.6.11",
         "typescript-eslint": "^8.23.0",
-        "vue-tsc": "^2.2.4"
+        "vue-tsc": "^2.2.10"
     },
     "dependencies": {
         "@inertiajs/vue3": "^2.0.0-beta.3",

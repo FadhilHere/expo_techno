@@ -50,7 +50,7 @@ const computedBreadcrumbs = computed<BreadcrumbItem[]>(() => {
 
     // Default breadcrumbs berdasarkan title jika tidak ada yang diberikan
     return [
-        { label: 'Menu', href: '/' },
+        { label: 'Menu', href: null },
         { label: props.title, href: null }
     ];
 });

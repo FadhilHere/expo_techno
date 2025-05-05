@@ -5,22 +5,51 @@ import TenantList from '@/pages/user/TenantListView.vue';
 import { usePage } from '@inertiajs/vue3';
 import { onMounted, ref } from 'vue';
 
+// Define interfaces for type safety
+interface OrderItem {
+    nama_produk: string;
+    quantity: number;
+    subtotal: number;
+}
+
+interface OrderSuccessData {
+    tenant_name: string;
+    items: OrderItem[];
+    total: number;
+    catatan_tambahan?: string;
+}
+
+interface PageProps {
+    flash: {
+        order_success?: OrderSuccessData;
+        [key: string]: any;
+    };
+    [key: string]: any;
+}
+
 // Props dari controller
-const props = defineProps({
-    tenants: Array,
-    kategoriTenants: Array,
-    stats: Object,
-    tahunExpo: Object, // Tambahkan prop tahunExpo
-    flash: Object, // Tambahkan prop flash
-});
+const props = defineProps<{
+    tenants?: Array<any>;
+    kategoriTenants?: Array<any>;
+    stats?: {
+        totalTenants: number;
+        totalOrders: number;
+        [key: string]: any;
+    };
+    tahunExpo?: any;
+    flash?: {
+        order_success?: OrderSuccessData;
+        [key: string]: any;
+    };
+}>();
 
 // Success modal state
 const showSuccessModal = ref(false);
-const orderSuccessData = ref(null);
+const orderSuccessData = ref<OrderSuccessData | null>(null);
 
 // Cek flash message untuk order_success dengan cara yang lebih aman
 onMounted(() => {
-    const page = usePage();
+    const page = usePage<PageProps>();
 
     // Cek jika flash dan order_success tersedia
     if (page.props.flash && page.props.flash.order_success) {
@@ -36,14 +65,14 @@ onMounted(() => {
 });
 
 // Format items untuk ditampilkan di modal
-const formatOrderItems = (items) => {
-    if (!items || !items.length) return '';
+// const formatOrderItems = (items: OrderItem[]) => {
+//     if (!items || !items.length) return '';
 
-    return items.map((item) => `${item.nama_produk} (${item.quantity})`).join(', ');
-};
+//     return items.map((item) => `${item.nama_produk} (${item.quantity})`).join(', ');
+// };
 
 // Format harga ke format rupiah
-const formatPrice = (price) => {
+const formatPrice = (price: number | undefined) => {
     if (!price) return 'Rp 0';
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -62,7 +91,7 @@ const formatPrice = (price) => {
 
         <!-- Featured UMKM Section -->
         <div class="mt-12" id="tenant-section">
-            <TenantList :tenants="tenants" :kategoriTenants="kategoriTenants" />
+            <TenantList :tenants="tenants || []" :kategoriTenants="kategoriTenants || []" />
         </div>
 
         <!-- Stats Section dengan Card Order -->
@@ -105,7 +134,7 @@ const formatPrice = (price) => {
                             </svg>
                         </div>
                     </div>
-                    <div class="relative z-10 mb-2 text-4xl font-bold text-gray-900">{{ stats.totalTenants }}</div>
+                    <div class="relative z-10 mb-2 text-4xl font-bold text-gray-900">{{ stats?.totalTenants || 0 }}</div>
                     <div class="relative z-10 text-gray-600">Total UMKM</div>
                 </div>
 
@@ -136,7 +165,7 @@ const formatPrice = (price) => {
                             </svg>
                         </div>
                     </div>
-                    <div class="relative z-10 mb-2 text-4xl font-bold text-gray-900">{{ kategoriTenants.length }}</div>
+                    <div class="relative z-10 mb-2 text-4xl font-bold text-gray-900">{{ kategoriTenants?.length || 0 }}</div>
                     <div class="relative z-10 text-gray-600">Kategori Produk</div>
                 </div>
 
@@ -167,7 +196,7 @@ const formatPrice = (price) => {
                             </svg>
                         </div>
                     </div>
-                    <div class="relative z-10 mb-2 text-4xl font-bold text-gray-900">{{ stats.totalOrders }}</div>
+                    <div class="relative z-10 mb-2 text-4xl font-bold text-gray-900">{{ stats?.totalOrders || 0 }}</div>
                     <div class="relative z-10 text-gray-600">Total Order</div>
                 </div>
             </div>

@@ -105,7 +105,7 @@ const filteredTenants = computed(() => {
 
     // Filter by kategori (hanya filter jika bukan "Semua Kategori")
     if (selectedKategori.value && selectedKategori.value !== '0') {
-        filtered = filtered.filter((tenant) => tenant.kategori_id === parseInt(selectedKategori.value));
+        filtered = filtered.filter((tenant) => tenant.kategori_id === parseInt(selectedKategori.value as string));
     }
 
     return filtered;

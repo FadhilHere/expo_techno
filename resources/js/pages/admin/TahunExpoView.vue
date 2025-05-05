@@ -160,27 +160,27 @@ const confirmDelete = (id: number) => {
     showDeleteDialog.value = true;
 };
 
-const handleFileChange = (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    if (target.files && target.files.length > 0) {
-        const file = target.files[0];
-        formData.value.photo = file;
-        formData.value.remove_photo = false;
+// const handleFileChange = (event: Event) => {
+//     const target = event.target as HTMLInputElement;
+//     if (target.files && target.files.length > 0) {
+//         const file = target.files[0];
+//         formData.value.photo = file;
+//         formData.value.remove_photo = false;
 
-        // Create preview
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            photoPreview.value = e.target?.result as string;
-        };
-        reader.readAsDataURL(file);
-    }
-};
+//         // Create preview
+//         const reader = new FileReader();
+//         reader.onload = (e) => {
+//             photoPreview.value = e.target?.result as string;
+//         };
+//         reader.readAsDataURL(file);
+//     }
+// };
 
-const removePhoto = () => {
-    formData.value.photo = null;
-    formData.value.remove_photo = true;
-    photoPreview.value = null;
-};
+// const removePhoto = () => {
+//     formData.value.photo = null;
+//     formData.value.remove_photo = true;
+//     photoPreview.value = null;
+// };
 
 const validateForm = () => {
     const errors: Record<string, string> = {};

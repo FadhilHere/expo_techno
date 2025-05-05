@@ -19,11 +19,11 @@ onMounted(() => {
 });
 
 // Toggle theme function
-const toggleTheme = () => {
-    theme.value = theme.value === 'light' ? 'dark' : 'light';
-    applyTheme(theme.value);
-    localStorage.setItem('theme', theme.value);
-};
+// const toggleTheme = () => {
+//     theme.value = theme.value === 'light' ? 'dark' : 'light';
+//     applyTheme(theme.value);
+//     localStorage.setItem('theme', theme.value);
+// };
 
 // Apply theme to document
 const applyTheme = (newTheme: string) => {

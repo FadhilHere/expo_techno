@@ -3,11 +3,48 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { Calendar, DollarSign, ShoppingCart, Store } from 'lucide-vue-next';
+import { ref } from 'vue';
+import type { LucideIcon } from 'lucide-vue-next';
+
+// Define interfaces for type safety
+interface Tenant {
+    id: number;
+    nama_tenant: string;
+}
+
+interface Order {
+    id: number;
+    created_at: string;
+    tenant: Tenant;
+    nama_pemesan: string;
+    nomor_wa: string;
+    total: number;
+    status_pesanan: string;
+}
+
+interface DashboardStats {
+    totalRevenue: number;
+    revenueChange: number;
+    activeTenants: number;
+    tenantChange: number;
+    totalOrders: number;
+    orderChange: number;
+    todayOrders: number;
+    todayOrderChange: number;
+}
+
+interface StatCard {
+    title: string;
+    value: string | number;
+    icon: LucideIcon;
+    change: string;
+    trend: 'up' | 'down';
+}
 
 // Function untuk memformat currency
-const formatCurrency = (value) => {
+const formatCurrency = (value: number) => {
     // Pastikan nilai adalah angka
-    const number = parseFloat(value);
+    const number = parseFloat(value.toString());
 
     // Cek apakah angka valid
     if (isNaN(number)) {
@@ -24,59 +61,47 @@ const formatCurrency = (value) => {
 };
 
 // Props dari controller - dengan tambahan data statistik
-const props = defineProps({
-    recentOrders: Array,
-    dashboardStats: Object, // Tambahan data statistik
-});
+const props = defineProps<{
+    recentOrders?: Order[];
+    dashboardStats?: DashboardStats;
+}>();
 
 // Data untuk stat cards dengan data dinamis dari controller
-const stats = [
+const stats = ref<StatCard[]>([
     {
         title: 'Total Pendapatan',
         value: formatCurrency(props.dashboardStats?.totalRevenue || 0),
         icon: DollarSign,
-        change: props.dashboardStats?.revenueChange + '%',
-        trend: props.dashboardStats?.revenueChange >= 0 ? 'up' : 'down',
+        change: (props.dashboardStats?.revenueChange || 0) + '%',
+        trend: (props.dashboardStats?.revenueChange || 0) >= 0 ? 'up' : 'down',
     },
     {
         title: 'Total Tenant Aktif',
         value: props.dashboardStats?.activeTenants || 0,
         icon: Store,
-        change: props.dashboardStats?.tenantChange + '%',
-        trend: props.dashboardStats?.tenantChange >= 0 ? 'up' : 'down',
+        change: (props.dashboardStats?.tenantChange || 0) + '%',
+        trend: (props.dashboardStats?.tenantChange || 0) >= 0 ? 'up' : 'down',
     },
     {
         title: 'Total Pesanan',
         value: props.dashboardStats?.totalOrders || 0,
         icon: ShoppingCart,
-        change: props.dashboardStats?.orderChange + '%',
-        trend: props.dashboardStats?.orderChange >= 0 ? 'up' : 'down',
+        change: (props.dashboardStats?.orderChange || 0) + '%',
+        trend: (props.dashboardStats?.orderChange || 0) >= 0 ? 'up' : 'down',
     },
     {
         title: 'Pesanan Hari Ini',
         value: props.dashboardStats?.todayOrders || 0,
         icon: Calendar,
-        change: props.dashboardStats?.todayOrderChange + '%',
-        trend: props.dashboardStats?.todayOrderChange >= 0 ? 'up' : 'down',
+        change: (props.dashboardStats?.todayOrderChange || 0) + '%',
+        trend: (props.dashboardStats?.todayOrderChange || 0) >= 0 ? 'up' : 'down',
     },
-];
+]);
 
-// Function untuk memformat status pesanan
-const getStatusBadge = (status) => {
-    switch (status) {
-        case 'pending':
-            return { variant: 'warning', label: 'Pending' };
-        case 'confirmed':
-            return { variant: 'success', label: 'Confirmed' };
-        case 'canceled':
-            return { variant: 'destructive', label: 'Canceled' };
-        default:
-            return { variant: 'outline', label: status };
-    }
-};
+const recentOrders = ref<Order[]>(props.recentOrders || []);
 
 // Function untuk mendapatkan class berdasarkan status
-const getStatusColor = (status) => {
+const getStatusColor = (status: string) => {
     switch (status) {
         case 'pending':
             return 'bg-yellow-100 text-yellow-800';
@@ -90,7 +115,7 @@ const getStatusColor = (status) => {
 };
 
 // Function untuk memformat status text
-const getStatusText = (status) => {
+const getStatusText = (status: string) => {
     switch (status) {
         case 'pending':
             return 'Pending';
@@ -104,7 +129,7 @@ const getStatusText = (status) => {
 };
 
 // Function untuk memformat tanggal
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('id-ID', {
         day: '2-digit',

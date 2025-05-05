@@ -5,7 +5,7 @@ import type { SidebarProps } from '@/components/ui/sidebar';
 // import NavProjects from '@/components/NavProjects.vue'
 import NavSimple from '@/components/NavSimple.vue';
 import NavUser from '@/components/NavUser.vue';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroupLabel, SidebarHeader, SidebarRail, useSidebar } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroupLabel, SidebarHeader, SidebarRail } from '@/components/ui/sidebar';
 
 import { PieChart, ShoppingCart, Square, Store, TimerIcon } from 'lucide-vue-next';
 
@@ -13,7 +13,7 @@ const props = withDefaults(defineProps<SidebarProps>(), {
     collapsible: 'icon',
 });
 
-const { state } = useSidebar();
+// const { state } = useSidebar();
 
 // This is sample data.
 const data = {

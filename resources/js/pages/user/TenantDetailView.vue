@@ -5,16 +5,40 @@ import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import { computed, onMounted, ref } from 'vue';
 
-const props = defineProps({
-    tenant: Object,
-});
+// Define interfaces for type safety
+interface Product {
+    id: number;
+    nama_produk: string;
+    harga: number;
+    deskripsi?: string;
+    foto_url?: string;
+}
+
+interface OrderItem extends Product {
+    quantity: number;
+}
+
+interface Tenant {
+    id: number;
+    nama_tenant: string;
+    deskripsi?: string;
+    whatsapp_tenant?: string;
+    logo_url?: string;
+    kategori?: string;
+    tahun_expo?: string;
+    products?: Product[];
+}
+
+const props = defineProps<{
+    tenant: Tenant;
+}>();
 
 // Order state
-const orderItems = ref([]);
+const orderItems = ref<OrderItem[]>([]);
 const showOrderModal = ref(false);
 const orderInProgress = ref(false);
-const orderSuccess = ref(false); // Added missing property
-const orderError = ref(null); // Added missing property
+const orderSuccess = ref(false);
+const orderError = ref<string | null>(null);
 
 // Order form using Inertia form
 const orderForm = useForm({
@@ -22,11 +46,11 @@ const orderForm = useForm({
     nama_pemesan: '',
     nomor_wa: '',
     catatan_tambahan: '',
-    items: [],
+    items: [] as {id: number, quantity: number}[],
 });
 
 // Format harga ke format rupiah
-const formatPrice = (price) => {
+const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
@@ -50,7 +74,7 @@ const whatsappLink = computed(() => {
 });
 
 // Order methods
-const addToOrder = (product) => {
+const addToOrder = (product: Product) => {
     const existingItem = orderItems.value.find((item) => item.id === product.id);
 
     if (existingItem) {
@@ -63,7 +87,7 @@ const addToOrder = (product) => {
     }
 };
 
-const removeFromOrder = (product) => {
+const removeFromOrder = (product: Product) => {
     const existingItem = orderItems.value.find((item) => item.id === product.id);
 
     if (existingItem) {
@@ -75,7 +99,7 @@ const removeFromOrder = (product) => {
     }
 };
 
-const getProductQuantity = (productId) => {
+const getProductQuantity = (productId: number) => {
     const item = orderItems.value.find((item) => item.id === productId);
     return item ? item.quantity : 0;
 };
@@ -113,7 +137,7 @@ const submitOrder = () => {
 };
 
 // Function untuk membatasi teks deskripsi
-const limitText = (text, limit = 100) => {
+const limitText = (text: string, limit = 100) => {
     if (!text) return '';
     return text.length > limit ? text.substring(0, limit) + '...' : text;
 };
@@ -124,7 +148,7 @@ onMounted(() => {
     setTimeout(() => {
         const descriptionRefs = document.querySelectorAll('.product-description');
         descriptionRefs.forEach((ref, index) => {
-            const product = props.tenant.products[index];
+            const product = props.tenant.products?.[index];
             if (product?.deskripsi) {
                 tippy(ref, {
                     content: product.deskripsi,
@@ -135,8 +159,8 @@ onMounted(() => {
                     arrow: true,
                     allowHTML: true,
                     interactive: true,
-                    onShow(instance) {
-                        const truncatedText = limitText(product.deskripsi, 100);
+                    onShow() {
+                        const truncatedText = limitText(product.deskripsi || '', 100);
                         if (truncatedText === product.deskripsi) {
                             return false;
                         }
@@ -152,7 +176,7 @@ const getCategoryStyle = computed(() => {
     if (!props.tenant.kategori) return 'bg-gray-100 text-gray-800';
 
     // Mapping khusus untuk beberapa kategori umum
-    const specificStyles = {
+    const specificStyles: Record<string, string> = {
         'Food & Beverage': 'bg-red-500 text-white',
         'Digital & Technology': 'bg-blue-500 text-white',
         'Beauty & Wellness': 'bg-pink-500 text-white',
@@ -164,8 +188,9 @@ const getCategoryStyle = computed(() => {
     };
 
     // Cek apakah kategori memiliki style khusus
-    if (specificStyles[props.tenant.kategori]) {
-        return specificStyles[props.tenant.kategori];
+    const kategori = props.tenant.kategori || '';
+    if (specificStyles[kategori]) {
+        return specificStyles[kategori];
     }
 
     // Untuk kategori lain, gunakan sistem warna yang lebih beragam
@@ -188,7 +213,7 @@ const getCategoryStyle = computed(() => {
     ];
 
     // Membuat hash dari nama kategori
-    const hash = props.tenant.kategori.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const hash = (props.tenant.kategori || '').split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
 
     // Memilih warna berdasarkan hash
     return colorStyles[hash % colorStyles.length];
@@ -207,7 +232,7 @@ const accentColor = computed(() => {
     ];
 
     // Menggunakan string hash sederhana untuk memilih warna
-    const hash = props.tenant.nama_tenant.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const hash = props.tenant.nama_tenant.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
 
     return colors[hash % colors.length];
 });
