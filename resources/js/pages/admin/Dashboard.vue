@@ -1,108 +1,206 @@
+<script setup lang="ts">
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AuthLayout from '@/layouts/AuthLayout.vue';
+import { Calendar, DollarSign, ShoppingCart, Store } from 'lucide-vue-next';
+import { ref } from 'vue';
+import type { LucideIcon } from 'lucide-vue-next';
+
+// Define interfaces for type safety
+interface Tenant {
+    id: number;
+    nama_tenant: string;
+}
+
+interface Order {
+    id: number;
+    created_at: string;
+    tenant: Tenant;
+    nama_pemesan: string;
+    nomor_wa: string;
+    total: number;
+    status_pesanan: string;
+}
+
+interface DashboardStats {
+    totalRevenue: number;
+    revenueChange: number;
+    activeTenants: number;
+    tenantChange: number;
+    totalOrders: number;
+    orderChange: number;
+    todayOrders: number;
+    todayOrderChange: number;
+}
+
+interface StatCard {
+    title: string;
+    value: string | number;
+    icon: LucideIcon;
+    change: string;
+    trend: 'up' | 'down';
+}
+
+// Function untuk memformat currency
+const formatCurrency = (value: number) => {
+    // Pastikan nilai adalah angka
+    const number = parseFloat(value.toString());
+
+    // Cek apakah angka valid
+    if (isNaN(number)) {
+        return value;
+    }
+
+    // Format sebagai mata uang Indonesia (Rupiah)
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }).format(number);
+};
+
+// Props dari controller - dengan tambahan data statistik
+const props = defineProps<{
+    recentOrders?: Order[];
+    dashboardStats?: DashboardStats;
+}>();
+
+// Data untuk stat cards dengan data dinamis dari controller
+const stats = ref<StatCard[]>([
+    {
+        title: 'Total Pendapatan',
+        value: formatCurrency(props.dashboardStats?.totalRevenue || 0),
+        icon: DollarSign,
+        change: (props.dashboardStats?.revenueChange || 0) + '%',
+        trend: (props.dashboardStats?.revenueChange || 0) >= 0 ? 'up' : 'down',
+    },
+    {
+        title: 'Total Tenant Aktif',
+        value: props.dashboardStats?.activeTenants || 0,
+        icon: Store,
+        change: (props.dashboardStats?.tenantChange || 0) + '%',
+        trend: (props.dashboardStats?.tenantChange || 0) >= 0 ? 'up' : 'down',
+    },
+    {
+        title: 'Total Pesanan',
+        value: props.dashboardStats?.totalOrders || 0,
+        icon: ShoppingCart,
+        change: (props.dashboardStats?.orderChange || 0) + '%',
+        trend: (props.dashboardStats?.orderChange || 0) >= 0 ? 'up' : 'down',
+    },
+    {
+        title: 'Pesanan Hari Ini',
+        value: props.dashboardStats?.todayOrders || 0,
+        icon: Calendar,
+        change: (props.dashboardStats?.todayOrderChange || 0) + '%',
+        trend: (props.dashboardStats?.todayOrderChange || 0) >= 0 ? 'up' : 'down',
+    },
+]);
+
+const recentOrders = ref<Order[]>(props.recentOrders || []);
+
+// Function untuk mendapatkan class berdasarkan status
+const getStatusColor = (status: string) => {
+    switch (status) {
+        case 'pending':
+            return 'bg-yellow-100 text-yellow-800';
+        case 'confirmed':
+            return 'bg-green-100 text-green-800';
+        case 'canceled':
+            return 'bg-red-100 text-red-800';
+        default:
+            return 'bg-gray-100 text-gray-800';
+    }
+};
+
+// Function untuk memformat status text
+const getStatusText = (status: string) => {
+    switch (status) {
+        case 'pending':
+            return 'Pending';
+        case 'confirmed':
+            return 'Confirmed';
+        case 'canceled':
+            return 'Canceled';
+        default:
+            return status;
+    }
+};
+
+// Function untuk memformat tanggal
+const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
+</script>
+
 <template>
-    <AuthLayout title="Dashboard">
-        <div class="space-y-4">
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <!-- Dashboard Cards -->
-                <div class="rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-medium">Total Tenants</h3>
-                        <Store class="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div class="mt-2">
-                        <p class="text-2xl font-bold">14</p>
-                        <p class="text-xs text-muted-foreground">+2 from last EXPO</p>
-                    </div>
-                </div>
-
-                <div class="rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-medium">Total Products</h3>
-                        <Package class="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div class="mt-2">
-                        <p class="text-2xl font-bold">87</p>
-                        <p class="text-xs text-muted-foreground">+15 from last EXPO</p>
-                    </div>
-                </div>
-
-                <div class="rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-medium">Pre-Orders</h3>
-                        <ShoppingCart class="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div class="mt-2">
-                        <p class="text-2xl font-bold">32</p>
-                        <p class="text-xs text-muted-foreground">+7 this week</p>
-                    </div>
-                </div>
-
-                <div class="rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-medium">Categories</h3>
-                        <FolderTree class="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div class="mt-2">
-                        <p class="text-2xl font-bold">8</p>
-                        <p class="text-xs text-muted-foreground">Same as last EXPO</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Pre-Orders -->
-            <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-                <div class="flex flex-col space-y-1.5 p-6">
-                    <h3 class="font-semibold leading-none tracking-tight">Recent Pre-Orders</h3>
-                    <p class="text-sm text-muted-foreground">
-                        Overview of the latest pre-orders from customers.
-                    </p>
-                </div>
-                <div class="p-6 pt-0">
-                    <div class="rounded-md border">
-                        <div class="relative w-full overflow-auto">
-                            <table class="w-full caption-bottom text-sm">
-                                <thead class="[&_tr]:border-b">
-                                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Customer</th>
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Tenant</th>
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date</th>
-                                </tr>
-                                </thead>
-                                <tbody class="[&_tr:last-child]:border-0">
-                                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <td class="p-4 align-middle">Budi Santoso</td>
-                                    <td class="p-4 align-middle">Coffee Tech</td>
-                                    <td class="p-4 align-middle"><span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80">Confirmed</span></td>
-                                    <td class="p-4 align-middle">2025-04-28</td>
-                                </tr>
-                                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <td class="p-4 align-middle">Siti Rahayu</td>
-                                    <td class="p-4 align-middle">Sweet Bytes</td>
-                                    <td class="p-4 align-middle"><span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground border-border">Pending</span></td>
-                                    <td class="p-4 align-middle">2025-04-27</td>
-                                </tr>
-                                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <td class="p-4 align-middle">Ahmad Hidayat</td>
-                                    <td class="p-4 align-middle">EcoStyle</td>
-                                    <td class="p-4 align-middle"><span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80">Confirmed</span></td>
-                                    <td class="p-4 align-middle">2025-04-26</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <AuthLayout title="Dashboard" description="Selamat datang di dashboard">
+        <!-- Stats grid -->
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card v-for="(stat, index) in stats" :key="index" class="bg-card">
+                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle class="text-sm font-medium">{{ stat.title }}</CardTitle>
+                    <component :is="stat.icon" class="text-muted-foreground h-4 w-4" />
+                </CardHeader>
+                <CardContent>
+                    <div class="text-2xl font-bold">{{ stat.value }}</div>
+                    <!-- <p class="text-muted-foreground mt-1 flex items-center text-xs">
+                        <span :class="stat.trend === 'up' ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400'">
+                            {{ stat.change }}
+                        </span>
+                        <span class="ml-1">dari bulan lalu</span>
+                    </p> -->
+                </CardContent>
+            </Card>
         </div>
+
+        <!-- Recent Orders Table -->
+        <Card class="mt-6">
+            <CardHeader>
+                <CardTitle>5 Order Terbaru</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>No</TableHead>
+                            <TableHead>Tanggal</TableHead>
+                            <TableHead>Tenant</TableHead>
+                            <TableHead>Pemesan</TableHead>
+                            <TableHead>Whatsapp</TableHead>
+                            <TableHead>Total</TableHead>
+                            <TableHead>Status</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow v-for="(order, index) in recentOrders" :key="order.id">
+                            <TableCell>{{ index + 1 }}</TableCell>
+                            <TableCell>{{ formatDate(order.created_at) }}</TableCell>
+                            <TableCell>{{ order.tenant.nama_tenant }}</TableCell>
+                            <TableCell>{{ order.nama_pemesan }}</TableCell>
+                            <TableCell>{{ order.nomor_wa }}</TableCell>
+                            <TableCell>{{ formatCurrency(order.total) }}</TableCell>
+                            <TableCell>
+                                <span :class="`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(order.status_pesanan)}`">
+                                    {{ getStatusText(order.status_pesanan) }}
+                                </span>
+                            </TableCell>
+                        </TableRow>
+                        <!-- Tampilkan pesan jika tidak ada order -->
+                        <TableRow v-if="!recentOrders || recentOrders.length === 0">
+                            <TableCell colspan="7" class="py-6 text-center text-gray-500"> Belum ada order masuk </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
     </AuthLayout>
 </template>
-
-<script setup lang="ts">
-import { Store, Package, ShoppingCart, FolderTree } from 'lucide-vue-next';
-import AuthLayout from '@/layouts/AuthLayout.vue';
-
-// Define component options
-defineOptions({
-    name: 'Dashboard'
-});
-</script>
