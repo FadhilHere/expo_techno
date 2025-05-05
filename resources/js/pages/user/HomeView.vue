@@ -32,7 +32,7 @@ onMounted(() => {
         showSuccessModal.value = true;
     }
 
-    console.log('Page props:', page.props); // Untuk debugging
+    // console.log('Page props:', page.props); // Untuk debugging
 });
 
 // Format items untuk ditampilkan di modal

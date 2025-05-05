@@ -13,6 +13,8 @@ const props = defineProps({
 const orderItems = ref([]);
 const showOrderModal = ref(false);
 const orderInProgress = ref(false);
+const orderSuccess = ref(false); // Added missing property
+const orderError = ref(null); // Added missing property
 
 // Order form using Inertia form
 const orderForm = useForm({
@@ -99,6 +101,10 @@ const submitOrder = () => {
             orderItems.value = [];
             orderForm.reset();
             showOrderModal.value = false;
+            orderSuccess.value = true; // Set success state
+        },
+        onError: (errors) => {
+            orderError.value = errors.message || 'Terjadi kesalahan saat memproses pesanan'; // Set error message
         },
         onFinish: () => {
             orderInProgress.value = false;
