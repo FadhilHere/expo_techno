@@ -1,3 +1,4 @@
+
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import AppSidebar from '@/components/AppSidebar.vue';
@@ -39,8 +40,11 @@ const props = defineProps({
     breadcrumbs: {
         type: Array as () => BreadcrumbItem[],
         default: null
+=======
+
     }
-});
+  });
+
 
 // Computed breadcrumbs (akan menggunakan default jika tidak ada yang diberikan)
 const computedBreadcrumbs = computed<BreadcrumbItem[]>(() => {

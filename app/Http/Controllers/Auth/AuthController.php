@@ -31,15 +31,19 @@ class AuthController extends Controller
         ]);
 
         // Attempt to authenticate
-        if (Auth::attempt([
-            'username' => $request->username,
-            'password' => $request->password
-        ])) {
+        if (
+            Auth::attempt([
+                'username' => $request->username,
+                'password' => $request->password
+            ])
+        ) {
             $request->session()->regenerate();
 
             return response()->json([
                 'success' => true,
+
                 'redirect' => route('dashboard')
+
             ]);
         }
 
@@ -59,7 +63,9 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+
         return redirect()->route('login');
+
     }
 
 }
