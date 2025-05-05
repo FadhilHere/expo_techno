@@ -63,7 +63,7 @@ const onSubmit = async () => {
             // For Inertia, you can use:
             window.location.href = response.data.redirect || '/dashboard';
         }
-    } catch (error) {
+    } catch (error: any) {
         // Handle login errors
         if (error.response && error.response.data) {
             loginError.value = error.response.data.message || 'Login failed. Please check your credentials.';
