@@ -1,33 +1,48 @@
 <?php
 
+// Import controllers
+use App\Http\Controllers\Auth\AuthController;
+use Illuminate\Support\Facades\Route;
+// Super Admin imports
+use App\Http\Controllers\SuperAdmin\AccountController;
+// Admin imports
 use App\Http\Controllers\Admin\KategoriTenantController;
 use App\Http\Controllers\Admin\PreOrderAdminController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\TenantController;
-use App\Http\Controllers\User\PreOrderController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\TahunExpoController;
+// Mahasiswa imports
+use App\Http\Controllers\Mahasiswa\DashboardMahasiswaController;
+use App\Http\Controllers\Mahasiswa\TenantMahasiswaController;
+// User imports
+use App\Http\Controllers\User\PreOrderController;
 use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\User\AboutusController;
-use Inertia\Inertia;
-use function Pest\Laravel\get;
 
 // Guest User Routes
 Route::get('/', [HomeController::class, 'showHomeView'])->name('home');
 Route::get('/about', [AboutusController::class, 'showAboutusView'])->name('about');
 Route::get('/tenant/{id}', [HomeController::class, 'showTenantDetail'])->name('tenant.detail');
 Route::post('/pre-order', [PreOrderController::class, 'InsertPreOrder'])->name('pre-order.insert');
-
 Route::get('/login', [AuthController::class, 'showLogin'])
     ->name('login');
-
 Route::post('/login', [AuthController::class, 'login'])
     ->name('login.post');
 
-// Admin Routes - Using isLogin middleware
-Route::middleware(['isLogin'])->prefix('admin')->group(function () {
+
+// Super Admin Routes - Using isLogin middleware with role parameter
+Route::middleware(['isLogin:super_admin'])->prefix('super-admin')->group(function () {
+    Route::get('/account', [AccountController::class, 'showAccountView'])->name('super-admin.account');
+    Route::post('/account', [AccountController::class, 'insertAccount'])->name('account.insert');
+    Route::put('/account/{id}', [AccountController::class, 'updateAccount'])->name('account.update');
+    Route::delete('/account/{id}', [AccountController::class, 'deleteAccount'])->name('account.delete');
+    Route::post('/account/multiple-status', [AccountController::class, 'updateMultipleAccountStatus'])->name('account.multiple-status');
+    Route::get('/tenants', [AccountController::class, 'getTenantData']);
+});
+
+// Admin Routes - Using isLogin middleware with role parameter
+Route::middleware(['isLogin:admin,super_admin'])->prefix('admin')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
     // Logout
@@ -56,6 +71,14 @@ Route::middleware(['isLogin'])->prefix('admin')->group(function () {
     Route::get('/pre-orders', [PreOrderAdminController::class, 'showPreOrders'])->name('pre-orders');
     Route::put('/pre-orders/{id}/status', [PreOrderAdminController::class, 'updatePreOrderStatus'])->name('pre-orders.status.update');
     Route::delete('/pre-orders/{id}', [PreOrderAdminController::class, 'deletePreOrder'])->name('pre-orders.delete');
+});
+
+// Mahasiswa Routes - Using isLogin middleware with role parameter
+Route::middleware(['isLogin:mahasiswa'])->prefix('mahasiswa')->group(function () {
+    // Dashboard Mahasiswa
+    Route::get('/dashboard', [DashboardMahasiswaController::class, 'index'])->name('mahasiswa.dashboard');
+    // Tenant Mahasiswa
+    Route::get('/tenant', [TenantMahasiswaController::class, 'index'])->name('mahasiswa.tenant');
 });
 
 require __DIR__ . '/settings.php';

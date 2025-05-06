@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('username');
             $table->string('password');
+            $table->enum('role', ['super_admin', 'admin', 'mahasiswa']);
+            $table->foreignId('tenant_id')->nullable()->constrained('tenants')->onDelete('set null');
+            $table->boolean('is_active');
             $table->rememberToken();
             $table->timestamps();
         });

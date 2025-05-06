@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from '@/components/ui/navigation-menu';
+import { Button } from '@/components/ui/button';
+import { Sun, Moon } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 
 // Theme state
@@ -19,11 +21,11 @@ onMounted(() => {
 });
 
 // Toggle theme function
-// const toggleTheme = () => {
-//     theme.value = theme.value === 'light' ? 'dark' : 'light';
-//     applyTheme(theme.value);
-//     localStorage.setItem('theme', theme.value);
-// };
+const toggleTheme = () => {
+    theme.value = theme.value === 'light' ? 'dark' : 'light';
+    applyTheme(theme.value);
+    localStorage.setItem('theme', theme.value);
+};
 
 // Apply theme to document
 const applyTheme = (newTheme: string) => {
@@ -63,11 +65,11 @@ const applyTheme = (newTheme: string) => {
 
                 <!-- Right section with buttons -->
                 <div class="flex items-center gap-4">
-                    <!-- <Button variant="default" as="a" href="/login"> Login </Button> -->
-                    <!-- <Button variant="outline" size="icon" @click="toggleTheme" aria-label="Toggle theme">
+                    <Button variant="default" as="a" href="/login"> Login </Button>
+                    <Button variant="outline" size="icon" @click="toggleTheme" aria-label="Toggle theme">
                         <Sun v-if="theme === 'dark'" class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all" />
                         <Moon v-else class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all" />
-                    </Button> -->
+                    </Button>
                 </div>
             </div>
         </div>

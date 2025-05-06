@@ -30,16 +30,42 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        // Attempt to authenticate
-        if (Auth::attempt([
+        // Get credentials to check
+        $credentials = [
             'username' => $request->username,
-            'password' => $request->password
-        ])) {
+            'password' => $request->password,
+            'is_active' => true // Only allow active users to login
+        ];
+
+        // Attempt to authenticate with active status check
+        if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+
+            // Get the authenticated user
+            $user = Auth::user();
+
+            // Determine redirect based on user role
+            $redirectRoute = match($user->role) {
+                'mahasiswa' => 'mahasiswa.dashboard',
+                'admin', 'super_admin' => 'dashboard',
+                default => 'login' // Fallback if role is not recognized
+            };
 
             return response()->json([
                 'success' => true,
-                'redirect' => route('dashboard')
+                'user' => [
+                    'username' => $user->username,
+                    'role' => $user->role
+                ],
+                'redirect' => route($redirectRoute)
+            ]);
+        }
+
+        // Check if user exists but is inactive
+        $user = User::where('username', $request->username)->first();
+        if ($user && Hash::check($request->password, $user->password) && !$user->is_active) {
+            throw ValidationException::withMessages([
+                'username' => ['Your account has been deactivated. Please contact administrator.'],
             ]);
         }
 

@@ -20,6 +20,9 @@ class User extends Authenticatable
     protected $fillable = [
         'username',
         'password',
+        'role',
+        'is_active',
+        'tenant_id',
     ];
 
     /**
@@ -42,5 +45,10 @@ class User extends Authenticatable
         return [
             'password' => 'hashed',
         ];
+    }
+
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
     }
 }

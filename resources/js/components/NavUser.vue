@@ -33,14 +33,17 @@ const handleLogout = () => {
         <SidebarMenuItem>
             <DropdownMenu>
                 <DropdownMenuTrigger as-child>
-                    <SidebarMenuButton size="lg" class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
+                    <SidebarMenuButton size="lg" class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground text-black dark:text-white relative">
+                        <!-- Debug information - remove after fixing -->
+                        <div class="absolute -top-5 right-0 text-xs text-red-500">DEBUG INFO</div>
+
                         <Avatar class="h-8 w-8 rounded-lg">
                             <AvatarImage :src="'/assets/Logo_polos.png'" :alt="user.name" />
                             <AvatarFallback class="rounded-lg"> CN </AvatarFallback>
                         </Avatar>
                         <div class="grid flex-1 text-left text-sm leading-tight">
-                            <span class="truncate font-medium">{{ user.name }}</span>
-                            <span class="truncate text-xs">{{ user.email }}</span>
+                            <span class="truncate font-bold text-black dark:text-white" style="color: black !important;">{{ user.name || 'NO NAME' }}</span>
+                            <span class="truncate text-xs text-black dark:text-white capitalize" style="color: black !important;">{{ user.email || 'NO ROLE' }}</span>
                         </div>
                         <ChevronsUpDown class="ml-auto size-4" />
                     </SidebarMenuButton>
@@ -58,8 +61,8 @@ const handleLogout = () => {
                                 <AvatarFallback class="rounded-lg"> CN </AvatarFallback>
                             </Avatar>
                             <div class="grid flex-1 text-left text-sm leading-tight">
-                                <span class="truncate font-semibold">{{ user.name }}</span>
-                                <span class="truncate text-xs">{{ user.email }}</span>
+                                <span class="truncate font-semibold text-black dark:text-white">{{ user.name }}</span>
+                                <span class="truncate text-xs text-black dark:text-white capitalize">{{ user.email }}</span>
                             </div>
                         </div>
                     </DropdownMenuLabel>
