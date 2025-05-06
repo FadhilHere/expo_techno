@@ -48,15 +48,22 @@ class HomeController extends Controller
                 ];
             });
 
-        // Ambil data tahun expo terbaru untuk hero section
-        $latestTahunExpo = TahunExpo::latest('tahun')->first();
+        // PERBAIKAN: Ambil data tahun expo untuk tahun saat ini, bukan yang terbaru
+        $currentYear = date('Y');
+        $currentTahunExpo = TahunExpo::where('tahun', $currentYear)->first();
+
+        // Jika tidak ditemukan tahun saat ini, barulah ambil yang terbaru
+        if (!$currentTahunExpo) {
+            $currentTahunExpo = TahunExpo::latest('tahun')->first();
+        }
+
         $tahunExpoData = null;
 
-        if ($latestTahunExpo) {
+        if ($currentTahunExpo) {
             $tahunExpoData = [
-                'id' => $latestTahunExpo->id,
-                'tahun' => $latestTahunExpo->tahun,
-                'deskripsi' => $latestTahunExpo->deskripsi,
+                'id' => $currentTahunExpo->id,
+                'tahun' => $currentTahunExpo->tahun,
+                'deskripsi' => $currentTahunExpo->deskripsi,
             ];
         }
 

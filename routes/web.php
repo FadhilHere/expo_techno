@@ -37,6 +37,8 @@ Route::middleware(['isLogin'])->prefix('admin')->group(function () {
     Route::post('/tahun-expo', [TahunExpoController::class, 'insertTahunExpo'])->name('tahun-expo.insert');
     Route::put('/tahun-expo/{id}', [TahunExpoController::class, 'updateTahunExpo'])->name('tahun-expo.update');
     Route::delete('/tahun-expo/{id}', [TahunExpoController::class, 'deleteTahunExpo'])->name('tahun-expo.delete');
+    Route::get('/tahun-expo-current', [TahunExpoController::class, 'getCurrentTahunExpo']);
+
     // Kategori Tenant
     Route::get('/kategori-tenant', [KategoriTenantController::class, 'showKategoriTenant'])->name('kategori-tenant');
     Route::post('/kategori-tenant', [KategoriTenantController::class, 'insertKategoriTenant'])->name('kategori-tenant.insert');

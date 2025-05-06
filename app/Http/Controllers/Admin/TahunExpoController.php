@@ -161,4 +161,18 @@ class TahunExpoController extends Controller
             return redirect()->back()->with('error', 'Gagal menghapus data');
         }
     }
+    // Get current year's expo data
+    // Get current year's expo data
+    public function getCurrentTahunExpo()
+    {
+        $currentYear = date('Y');
+        $tahunExpo = TahunExpo::where('tahun', $currentYear)->first();
+
+        if (!$tahunExpo) {
+            // If not found, get most recent year
+            $tahunExpo = TahunExpo::orderBy('tahun', 'desc')->first();
+        }
+
+        return response()->json($tahunExpo);
+    }
 }
