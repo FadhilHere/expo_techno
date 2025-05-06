@@ -1,14 +1,11 @@
-
 <script setup lang="ts">
 import UserLayout from '@/layouts/UserLayout.vue';
-
-
 import axios from 'axios';
 import { reactive, ref } from 'vue';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label'; -->
+import { Label } from '@/components/ui/label';
 
 // Form data
 const form = reactive({
@@ -16,11 +13,7 @@ const form = reactive({
     password: '',
 });
 
-
-const form = reactive({
-  username: '',
-  password: '',
-})
+// Form state
 const errors = reactive({
     username: '',
     password: '',
@@ -32,34 +25,27 @@ const loginError = ref('');
 const validateForm = () => {
     let isValid = true;
 
+    // Reset errors
+    errors.username = '';
+    errors.password = '';
 
-// Simulasi login
+    if (!form.username) {
+        errors.username = 'Username is required';
+        isValid = false;
+    }
+
+    if (!form.password) {
+        errors.password = 'Password is required';
+        isValid = false;
+    }
+
+    return isValid;
+};
+
+// Form submission handler
 const onSubmit = async () => {
-  isSubmitting.value = true
-  loginError.value = ''
-  errors.username = ''
-  errors.password = ''
-
-  // Validasi dummy
-  if (!form.username) errors.username = 'Username is required'
-  if (!form.password) errors.password = 'Password is required'
-
-  if (errors.username || errors.password) {
-    isSubmitting.value = false
-    return
-  }
-
-  try {
-    isSubmitting.value = true;
-    loginError.value = '';
-
-    const response = await axios.post('/login', {
-        username: form.username,
-        password: form.password
-    });
-
-    if (response.data.success) {
-        window.location.href = response.data.redirect || '/admin/dashboard';
+    if (!validateForm()) {
+        return;
     }
 
     try {
@@ -86,12 +72,8 @@ const onSubmit = async () => {
         }
     } finally {
         isSubmitting.value = false;
-
     }
-} finally {
-    isSubmitting.value = false;
-}
-}
+};
 </script>
 
 <template>
