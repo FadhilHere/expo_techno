@@ -1,13 +1,19 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue';
+
+// Interface for tahun data
+interface TahunExpo {
+    id: number;
+    tahun: string;
+    deskripsi: string;
+}
+
 // Definisikan prop untuk menerima data dari komponen induk
-defineProps({
+const props = defineProps({
     tahunExpo: {
         type: Object,
-        required: true,
-        default: () => ({
-            tahun: '2025',
-            deskripsi: 'SELAMAT DATANG DI WEBSITE EXPO TECHNOPRENEURSHIP.',
-        }),
+        required: false,
+        default: null,
     },
     stats: {
         type: Object,
@@ -17,6 +23,37 @@ defineProps({
             totalOrders: 0,
         }),
     },
+});
+
+// Data untuk tahun expo
+const tahunExpoData = ref({
+    tahun: new Date().getFullYear().toString(),
+    deskripsi: 'SELAMAT DATANG DI WEBSITE EXPO TECHNOPRENEURSHIP.',
+});
+
+// Fungsi untuk mengatur tahun expo dari props atau default
+const initTahunExpo = () => {
+    // Jika props.tahunExpo ada, gunakan itu
+    if (props.tahunExpo && props.tahunExpo.tahun) {
+        tahunExpoData.value = {
+            tahun: props.tahunExpo.tahun,
+            deskripsi: props.tahunExpo.deskripsi,
+        };
+        console.log('Using tahunExpo from props:', tahunExpoData.value);
+    } else {
+        // Fallback ke tahun sekarang
+        const currentYear = new Date().getFullYear().toString();
+        tahunExpoData.value = {
+            tahun: currentYear,
+            deskripsi: `SELAMAT DATANG DI WEBSITE EXPO TECHNOPRENEURSHIP ${currentYear}.`,
+        };
+        console.log('Using default tahunExpo:', tahunExpoData.value);
+    }
+};
+
+// Panggil fungsi initialization saat component dimount
+onMounted(() => {
+    initTahunExpo();
 });
 
 // Fungsi untuk smooth scroll ke tenant section
@@ -36,28 +73,35 @@ const scrollToTenants = (event: Event) => {
 <template>
     <div class="w-full">
         <!-- Gunakan container dengan max-width tertentu dan mx-auto untuk membuat konten terpusat -->
-        <div class="mx-auto max-w-screen-xl px-4 py-8 sm:py-12 md:py-16 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 sm:py-12 md:py-16 lg:px-8">
             <!-- Hero Content -->
             <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
                 <!-- Left Content -->
                 <div>
+                    <!-- Tambahkan logo SI dan HIMA di sini, di bagian atas konten kiri -->
+                    <div class="mb-2 flex items-center">
+                        <img src="assets/Logo_SI.png" alt="Logo SI" class="h-20 w-auto" />
+                        <img src="assets/LOGO_HIMA.png" alt="Logo HIMA" class="h-25 w-auto" />
+                    </div>
+
                     <!-- Responsive title that displays differently on mobile -->
                     <div class="mb-6">
-                        <!-- Mobile version (stacked lines) -->
-                        <h2 class="block md:hidden text-4xl font-bold leading-tight">
-                            <span class="block mb-2">EXPO</span>
-                            <span class="block mb-2">Technopreneurship</span>
-                            <span class="block">2024: Inovasi Digital untuk UMKM Indonesia</span>
+                        <!-- Mobile version -->
+                        <h2 class="block text-4xl leading-tight font-bold md:hidden">
+                            {{ tahunExpoData.deskripsi || 'SELAMAT DATANG DI WEBSITE EXPO TECHNOPRENEURSHIP ' + tahunExpoData.tahun + '.' }}
                         </h2>
 
-                        <!-- Desktop version (original) -->
-                        <h2 class="hidden md:block text-5xl font-bold leading-tight">
-                            {{ tahunExpo.deskripsi || 'SELAMAT DATANG DI WEBSITE EXPO TECHNOPRENEURSHIP ' + tahunExpo.tahun + '.' }}
+                        <!-- Desktop version -->
+                        <h2 class="hidden text-5xl leading-tight font-bold md:block">
+                            {{ tahunExpoData.deskripsi || 'SELAMAT DATANG DI WEBSITE EXPO TECHNOPRENEURSHIP ' + tahunExpoData.tahun + '.' }}
                         </h2>
                     </div>
 
                     <p class="mb-8 text-gray-500">
-                        Event ini diselenggarakan oleh Program Studi Sistem Informasi sebagai hasil dari pendampingan yang dilakukan kepada UMKM.
+                        Event ini diselenggarakan oleh Program Studi Sistem Informasi melalui mata kuliah IS Technopreneurship sebagai puncak dari
+                        proses pendampingan UMKM yang berlangsung selama setengah semester. Kegiatan ini merupakan wadah bagi mahasiswa untuk
+                        menampilkan hasil kolaborasi dengan pelaku UMKM dalam mengembangkan solusi digital yang inovatif untuk mendorong pertumbuhan
+                        usaha lokal.
                     </p>
                     <a
                         href="#tenant-section"
@@ -78,24 +122,17 @@ const scrollToTenants = (event: Event) => {
                             <p class="text-gray-500">Total Orders</p>
                         </div>
                     </div>
-
-                    <!-- Trusted By -->
-                    <!-- <div class="mt-12">
-                        <p class="mb-4 text-sm text-gray-500">TRUSTED BY THE BEST</p>
-                        <div class="flex space-x-6">
-                            <span class="text-gray-700">Microsoft</span>
-                            <span class="text-gray-700">Apple</span>
-                            <span class="text-gray-700">The Boring Company</span>
-                        </div>
-                    </div> -->
                 </div>
 
                 <!-- Right Content - Cards -->
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <!-- Mobile view cards -->
-                    <div class="md:hidden space-y-6 w-full">
+                    <div class="w-full space-y-6 md:hidden">
                         <!-- Card 1 - Main card for mobile -->
-                        <div class="w-full h-64 overflow-hidden rounded-xl bg-cover bg-center" style="background-image: url('/assets/expotenant2.jpg')">
+                        <div
+                            class="h-64 w-full overflow-hidden rounded-xl bg-cover bg-center"
+                            style="background-image: url('/assets/expotenant2.jpg')"
+                        >
                             <div class="flex h-full flex-col justify-end bg-gradient-to-t from-black/70 to-transparent p-6">
                                 <span class="text-sm text-white/80">Mendukung ekonomi lokal</span>
                                 <h3 class="text-2xl font-semibold text-white">Puluhan UMKM berpartisipasi</h3>
@@ -103,7 +140,10 @@ const scrollToTenants = (event: Event) => {
                         </div>
 
                         <!-- Card 2 for mobile -->
-                        <div class="w-full h-64 overflow-hidden rounded-xl bg-cover bg-center" style="background-image: url('/assets/expotenant3.jpg')">
+                        <div
+                            class="h-64 w-full overflow-hidden rounded-xl bg-cover bg-center"
+                            style="background-image: url('/assets/expotenant3.jpg')"
+                        >
                             <div class="flex h-full flex-col justify-end bg-gradient-to-t from-black/70 to-transparent p-6">
                                 <span class="text-sm text-white/80">Pemberdayaan pelaku usaha</span>
                                 <h3 class="text-2xl font-semibold text-white">Pertumbuhan UMKM nasional</h3>
@@ -112,21 +152,30 @@ const scrollToTenants = (event: Event) => {
                     </div>
 
                     <!-- Desktop view cards -->
-                    <div class="hidden md:block col-span-2 overflow-hidden rounded-3xl bg-cover bg-center" style="background-image: url('/assets/expotenant2.jpg')">
+                    <div
+                        class="col-span-2 hidden overflow-hidden rounded-3xl bg-cover bg-center md:block"
+                        style="background-image: url('/assets/expotenant2.jpg')"
+                    >
                         <div class="flex h-full flex-col justify-end bg-gradient-to-t from-black/70 to-transparent p-6">
                             <span class="text-sm text-white/80">Mendukung ekonomi lokal</span>
                             <h3 class="text-3xl font-semibold text-white">Puluhan UMKM berpartisipasi</h3>
                         </div>
                     </div>
 
-                    <div class="hidden md:block overflow-hidden rounded-3xl bg-cover bg-center" style="background-image: url('/assets/expotenant1.jpg')">
+                    <div
+                        class="hidden overflow-hidden rounded-3xl bg-cover bg-center md:block"
+                        style="background-image: url('/assets/expotenant1.jpg')"
+                    >
                         <div class="flex h-full flex-col justify-end bg-gradient-to-t from-black/70 to-transparent p-6">
                             <span class="text-sm text-white/80">Produk berkualitas tinggi</span>
                             <h3 class="text-2xl font-semibold text-white">Karya terbaik lokal</h3>
                         </div>
                     </div>
 
-                    <div class="hidden md:block overflow-hidden rounded-3xl bg-cover bg-center" style="background-image: url('/assets/expotenant3.jpg')">
+                    <div
+                        class="hidden overflow-hidden rounded-3xl bg-cover bg-center md:block"
+                        style="background-image: url('/assets/expotenant3.jpg')"
+                    >
                         <div class="flex h-full flex-col justify-end bg-gradient-to-t from-black/70 to-transparent p-6">
                             <span class="text-sm text-white/80">Pemberdayaan pelaku usaha</span>
                             <h3 class="text-2xl font-semibold text-white">Pertumbuhan UMKM nasional</h3>

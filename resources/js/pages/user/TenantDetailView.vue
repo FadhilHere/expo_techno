@@ -46,7 +46,7 @@ const orderForm = useForm({
     nama_pemesan: '',
     nomor_wa: '',
     catatan_tambahan: '',
-    items: [] as {id: number, quantity: number}[],
+    items: [] as { id: number; quantity: number }[],
 });
 
 // Format harga ke format rupiah
@@ -334,7 +334,7 @@ const accentColor = computed(() => {
                             </div>
 
                             <!-- Contact Info -->
-                            <div v-if="whatsappLink" class="mt-4">
+                            <!-- <div v-if="whatsappLink" class="mt-4">
                                 <a
                                     :href="whatsappLink"
                                     target="_blank"
@@ -347,7 +347,7 @@ const accentColor = computed(() => {
                                     </svg>
                                     Hubungi via WhatsApp
                                 </a>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>

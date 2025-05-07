@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from '@/components/ui/navigation-menu';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon } from 'lucide-vue-next';
+import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from '@/components/ui/navigation-menu';
+import { Moon, Sun } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 
 // Theme state
