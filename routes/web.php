@@ -75,10 +75,18 @@ Route::middleware(['isLogin:admin,super_admin'])->prefix('admin')->group(functio
 
 // Mahasiswa Routes - Using isLogin middleware with role parameter
 Route::middleware(['isLogin:mahasiswa'])->prefix('mahasiswa')->group(function () {
+
     // Dashboard Mahasiswa
     Route::get('/dashboard', [DashboardMahasiswaController::class, 'index'])->name('mahasiswa.dashboard');
+
     // Tenant Mahasiswa
-    Route::get('/tenant', [TenantMahasiswaController::class, 'index'])->name('mahasiswa.tenant');
+    Route::get('/tenant', [TenantMahasiswaController::class, 'showTenantMahasiswa'])->name('mahasiswa.tenant');
+    Route::post('/tenant/{id}/products', [TenantMahasiswaController::class, 'insertProduct'])->name('mahasiswa.tenant.products.add');
+    // For product updates we allow both POST and PUT methods
+    Route::match(['post', 'put'], '/tenant/{id}/products/{productId}', [TenantMahasiswaController::class, 'updateProduct'])
+        ->name('mahasiswa.tenant.products.update');
+
+    Route::delete('/tenant/{id}/products/{productId}', [TenantMahasiswaController::class, 'deleteProduct'])->name('mahasiswa.tenant.products.delete');
 });
 
 require __DIR__ . '/settings.php';
