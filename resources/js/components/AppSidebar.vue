@@ -112,6 +112,12 @@ const data = {
             icon: Store,
             roles: ['mahasiswa'],
         },
+        {
+            title: 'PreOrder Mahasiswa',
+            url: '/mahasiswa/pre-orders',
+            icon: ShoppingCart,
+            roles: ['mahasiswa'],
+        },
     ],
     //   navMain: [
     //     {

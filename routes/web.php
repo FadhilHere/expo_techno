@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\TahunExpoController;
 // Mahasiswa imports
 use App\Http\Controllers\Mahasiswa\DashboardMahasiswaController;
 use App\Http\Controllers\Mahasiswa\TenantMahasiswaController;
+use App\Http\Controllers\Mahasiswa\PreOrderMahasiswaController;
 // User imports
 use App\Http\Controllers\User\PreOrderController;
 use App\Http\Controllers\User\HomeController;
@@ -85,8 +86,12 @@ Route::middleware(['isLogin:mahasiswa'])->prefix('mahasiswa')->group(function ()
     // For product updates we allow both POST and PUT methods
     Route::match(['post', 'put'], '/tenant/{id}/products/{productId}', [TenantMahasiswaController::class, 'updateProduct'])
         ->name('mahasiswa.tenant.products.update');
-
     Route::delete('/tenant/{id}/products/{productId}', [TenantMahasiswaController::class, 'deleteProduct'])->name('mahasiswa.tenant.products.delete');
+
+    // Pre Order Mahasiswa
+    Route::get('/pre-orders', [PreOrderMahasiswaController::class, 'showPreOrderMahasiswa'])->name('mahasiswa.pre-orders');
+    Route::get('/pre-orders/{id}', [PreOrderMahasiswaController::class, 'showPreOrderMahasiswaDetail'])->name('mahasiswa.pre-orders.detail');
+    Route::patch('/pre-orders/{id}/status', [PreOrderMahasiswaController::class, 'updateStatusPreOrder'])->name('mahasiswa.pre-orders.status.update');
 });
 
 require __DIR__ . '/settings.php';
