@@ -42,7 +42,7 @@ class OnSiteOrderMahasiswaController extends Controller
                     'nama_tenant' => $tenant->nama_tenant,
                     'deskripsi' => $tenant->deskripsi,
                     'whatsapp_tenant' => $tenant->whatsapp_tenant,
-                    'logo_url' => $tenant->logo ? asset('storage/logos/' . $tenant->logo) : asset('assets/no_image.png'),
+                    'logo_url' => $tenant->logo ? asset('storage/' . $tenant->logo) : asset('assets/no_image.png'),
                     'products' => $tenant->products->map(function ($product) {
                         return [
                             'id' => $product->id,
