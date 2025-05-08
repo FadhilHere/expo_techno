@@ -9,8 +9,10 @@ use App\Models\Tenant;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class OnSiteOrderMahasiswaController extends Controller
 {
@@ -48,7 +50,9 @@ class OnSiteOrderMahasiswaController extends Controller
                             'harga' => $product->harga,
                             'deskripsi' => $product->deskripsi,
                             'foto_url' => $product->foto_produk
-                                ? asset('storage/products/' . $product->foto_produk)
+                                ? (strpos($product->foto_produk, 'product-photos/') === 0
+                                    ? asset('storage/' . $product->foto_produk)
+                                    : asset('storage/product-photos/' . $product->foto_produk))
                                 : asset('assets/no_image.png'),
                         ];
                     }),
@@ -70,7 +74,7 @@ class OnSiteOrderMahasiswaController extends Controller
                     'tenant_id' => $order->tenant_id,
                     'nama_pembeli' => $order->nama_pembeli,
                     'total_amount' => $order->total_amount,
-                    'tanggal_pembelian' => $order->tanggal_pembelian->format('Y-m-d H:i:s'),
+                    'tanggal_pembelian' => Carbon::parse($order->tanggal_pembelian)->format('Y-m-d H:i:s'),
                     'catatan' => $order->catatan,
                     'created_at' => $order->created_at->format('Y-m-d H:i:s'),
                     'items' => $order->items->map(function ($item) {

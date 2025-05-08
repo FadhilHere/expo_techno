@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { router, useForm } from '@inertiajs/vue3';
-import { computed, onMounted, ref, watch } from 'vue';
+import { router, useForm, usePage } from '@inertiajs/vue3';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
+import 'tippy.js/themes/light.css';
 
 // Import required components
 import Alert from '@/components/Alert.vue';
@@ -11,6 +14,16 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import AuthLayout from '@/layouts/AuthLayout.vue';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 // Define interfaces for type safety
 interface Product {
@@ -53,6 +66,15 @@ interface OnSiteOrder {
     }[];
 }
 
+// Extend Inertia PageProps to include flash messages
+interface CustomPageProps {
+    flash: {
+        success?: string;
+        error?: string;
+    };
+    [key: string]: any;
+}
+
 // Props
 const props = defineProps<{
     tenants: Tenant[];
@@ -69,7 +91,6 @@ const breadcrumbItems = computed(() => {
 
 // Select the tenant automatically if available
 const selectedTenant = ref<Tenant | null>(props.tenants.length > 0 ? props.tenants[0] : null);
-
 const orderItems = ref<OrderItem[]>([]);
 const orderForm = useForm({
     tenant_id: selectedTenant.value ? selectedTenant.value.id.toString() : '',
@@ -77,21 +98,66 @@ const orderForm = useForm({
     catatan: '',
     items: [] as { produk_id: number; nama_produk: string; harga_satuan: number; qty: number }[],
 });
-const orderSuccess = ref(false);
-const orderError = ref<string | null>(null);
 const isSubmitting = ref(false);
+const showOrderDetails = ref(false);
+const selectedOrder = ref<OnSiteOrder | null>(null);
+const isDeleting = ref(false);
+const showDeleteOrderDialog = ref(false);
+const deleteOrderId = ref<number | null>(null);
 
 // For datatable
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
 const searchQuery = ref('');
-const showOrderDetails = ref(false);
-const selectedOrder = ref<OnSiteOrder | null>(null);
-const isDeleting = ref(false);
+
+// Alert state
 const alert = ref({
     show: false,
     type: 'success' as 'success' | 'error',
     message: '',
+});
+
+// Check initial flash messages
+const page = usePage<CustomPageProps>();
+if (page.props.flash?.success) {
+    alert.value = {
+        show: true,
+        type: 'success',
+        message: page.props.flash.success,
+    };
+} else if (page.props.flash?.error) {
+    alert.value = {
+        show: true,
+        type: 'error',
+        message: page.props.flash.error,
+    };
+}
+
+// Set up event listener for success events
+const successHandler = () => {
+    // This is called after a successful form submission and page reload
+    if (page.props.flash?.success) {
+        alert.value = {
+            show: true,
+            type: 'success',
+            message: page.props.flash.success,
+        };
+    }
+};
+
+onMounted(() => {
+    router.on('success', successHandler);
+    // Auto-select the tenant if there's only one
+    if (props.tenants.length === 1) {
+        selectedTenant.value = props.tenants[0];
+        orderForm.tenant_id = props.tenants[0].id.toString();
+    }
+    initializeTippy();
+});
+
+onBeforeUnmount(() => {
+    // Use type assertion to avoid TypeScript error
+    (router as any).off?.('success', successHandler);
 });
 
 // Format price to IDR
@@ -259,12 +325,10 @@ const submitOrder = () => {
             if (selectedTenant.value) {
                 orderForm.tenant_id = selectedTenant.value.id.toString();
             }
-            orderSuccess.value = true;
             showAlert('success', 'Pesanan berhasil dibuat!');
         },
         onError: (errors) => {
-            orderError.value = errors.message || 'Terjadi kesalahan saat memproses pesanan';
-            showAlert('error', orderError.value);
+            showAlert('error', errors.message || 'Terjadi kesalahan saat memproses pesanan');
         },
         onFinish: () => {
             isSubmitting.value = false;
@@ -280,18 +344,20 @@ const viewOrderDetails = (order: OnSiteOrder) => {
 
 // Confirm order deletion
 const confirmDeleteOrder = (id: number) => {
-    if (confirm('Apakah Anda yakin ingin menghapus pesanan ini? Tindakan ini tidak dapat dibatalkan.')) {
-        deleteOrder(id);
-    }
+    deleteOrderId.value = id;
+    showDeleteOrderDialog.value = true;
 };
 
 // Delete order
-const deleteOrder = (id: number) => {
+const deleteOrder = () => {
+    if (!deleteOrderId.value) return;
+
     isDeleting.value = true;
 
     // Use Inertia to delete the order
-    router.delete(`/mahasiswa/on-site-orders/${id}`, {
+    router.delete(`/mahasiswa/on-site-orders/${deleteOrderId.value}`, {
         onSuccess: () => {
+            showDeleteOrderDialog.value = false;
             showAlert('success', 'Pesanan berhasil dihapus');
             isDeleting.value = false;
         },
@@ -302,19 +368,43 @@ const deleteOrder = (id: number) => {
     });
 };
 
-// Function to limit text for descriptions
-const limitText = (text: string, limit = 100) => {
-    if (!text) return '';
-    return text.length > limit ? text.substring(0, limit) + '...' : text;
+// Function untuk inisialisasi Tippy
+const initializeTippy = () => {
+    if (!selectedTenant.value?.products) return;
+
+    // Destroy existing tooltips first
+    const existingInstances = tippy.instances;
+    if (existingInstances) {
+        existingInstances.forEach(instance => instance.destroy());
+    }
+
+    // Wait for DOM to update
+    setTimeout(() => {
+        const descriptionRefs = document.querySelectorAll('.product-description');
+        descriptionRefs.forEach((ref, index) => {
+            const product = selectedTenant.value?.products?.[index];
+            if (product?.deskripsi) {
+                tippy(ref, {
+                    content: product.deskripsi,
+                    placement: 'top',
+                    theme: 'light',
+                    maxWidth: 350,
+                    delay: [0, 200],
+                    arrow: true,
+                    allowHTML: true,
+                    interactive: true,
+                });
+            }
+        });
+    }, 100);
 };
 
-onMounted(() => {
-    // Auto-select the tenant if there's only one
-    if (props.tenants.length === 1) {
-        selectedTenant.value = props.tenants[0];
-        orderForm.tenant_id = props.tenants[0].id.toString();
+// Watch for changes in selectedTenant
+watch(() => selectedTenant.value, (newValue) => {
+    if (newValue) {
+        initializeTippy();
     }
-});
+}, { deep: true });
 </script>
 <template>
     <AuthLayout title="Pemesanan Onsite" description="Kelola pemesanan onsite untuk tenant" :breadcrumbs="breadcrumbItems">
@@ -324,28 +414,7 @@ onMounted(() => {
             </div>
 
             <!-- Alert Notification -->
-            <Alert v-if="alert.show" :type="alert.type" :message="alert.message" @close="alert.show = false" />
-
-            <!-- Success Alert -->
-            <div v-if="orderSuccess" class="mb-6 rounded-lg bg-green-50 p-4 text-green-800">
-                <div class="flex">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div>
-                        <h3 class="font-semibold">Pesanan Berhasil Dibuat!</h3>
-                        <div class="mt-1 text-sm">Pesanan telah berhasil tercatat dalam sistem.</div>
-                        <div class="mt-3">
-                            <button
-                                @click="orderSuccess = false"
-                                class="rounded-lg bg-green-100 px-3 py-1.5 text-sm font-medium text-green-800 hover:bg-green-200"
-                            >
-                                Tutup
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <Alert v-model:show="alert.show" :type="alert.type" :message="alert.message" />
 
             <!-- Main Content Grid - 3 Columns on larger screens -->
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -401,65 +470,67 @@ onMounted(() => {
 
                         <div
                             v-if="selectedTenant.products && selectedTenant.products.length > 0"
-                            class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3"
+                            class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
                         >
                             <!-- Product Card -->
                             <div
                                 v-for="product in selectedTenant.products"
                                 :key="product.id"
-                                class="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                                class="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md"
                             >
                                 <!-- Product Image -->
-                                <div class="aspect-video w-full overflow-hidden bg-gray-100">
+                                <div class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
                                     <img
                                         :src="product.foto_url"
                                         :alt="product.nama_produk"
-                                        class="h-full w-full object-cover"
+                                        class="h-full w-full object-contain"
                                         onerror="this.src='/assets/no_image.png'"
                                     />
                                 </div>
 
                                 <!-- Product Info -->
                                 <div class="flex flex-1 flex-col p-4">
-                                    <h3 class="mb-1 text-lg font-semibold">{{ product.nama_produk }}</h3>
-                                    <p class="mb-2 font-bold text-gray-700">{{ formatPrice(product.harga) }}</p>
+                                    <h3 class="mb-2 text-lg font-semibold line-clamp-1">
+                                        {{ product.nama_produk }}
+                                    </h3>
+                                    <p class="mb-3 font-bold text-gray-700">{{ formatPrice(product.harga) }}</p>
 
-                                    <p v-if="product.deskripsi" class="mb-4 h-12 overflow-hidden text-sm text-gray-600">
-                                        {{ limitText(product.deskripsi) }}
+                                    <p v-if="product.deskripsi"
+                                       class="product-description mb-6 text-sm text-gray-600 line-clamp-2 cursor-help"
+                                       :data-tippy-content="product.deskripsi">
+                                        {{ product.deskripsi }}
                                     </p>
 
                                     <!-- Quantity Controls -->
-                                    <div class="mt-auto flex items-center justify-between gap-4">
-                                        <div class="flex items-center">
-                                            <button
-                                                @click="removeFromOrder(product)"
-                                                :disabled="getProductQuantity(product.id) === 0"
-                                                class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                            <div class="w-12 text-center font-medium">
-                                                {{ getProductQuantity(product.id) }}
-                                            </div>
-                                            <button
-                                                @click="addToOrder(product)"
-                                                class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-50"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
+                                    <div class="mt-auto flex items-center justify-center space-x-6">
+                                        <button
+                                            @click="removeFromOrder(product)"
+                                            :disabled="getProductQuantity(product.id) === 0"
+                                            class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path
+                                                    fill-rule="evenodd"
+                                                    d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                                                    clip-rule="evenodd"
+                                                />
+                                            </svg>
+                                        </button>
+                                        <div class="w-10 text-center font-medium">
+                                            {{ getProductQuantity(product.id) }}
                                         </div>
+                                        <button
+                                            @click="addToOrder(product)"
+                                            class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-50"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path
+                                                    fill-rule="evenodd"
+                                                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                                    clip-rule="evenodd"
+                                                />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -729,4 +800,22 @@ onMounted(() => {
             </Dialog>
         </div>
     </AuthLayout>
+
+    <!-- Delete Order Confirmation Dialog -->
+    <AlertDialog v-model:open="showDeleteOrderDialog">
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
+                <AlertDialogDescription>
+                    Apakah Anda yakin ingin menghapus pesanan ini? Tindakan ini tidak dapat dibatalkan.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel @click="showDeleteOrderDialog = false">Batal</AlertDialogCancel>
+                <AlertDialogAction @click="deleteOrder" class="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Hapus
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
 </template>

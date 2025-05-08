@@ -2,11 +2,11 @@
 import { onMounted, ref } from 'vue';
 
 // Interface for tahun data
-interface TahunExpo {
-    id: number;
-    tahun: string;
-    deskripsi: string;
-}
+// interface TahunExpo {
+//     id: number;
+//     tahun: string;
+//     deskripsi: string;
+// }
 
 // Definisikan prop untuk menerima data dari komponen induk
 const props = defineProps({
@@ -39,7 +39,7 @@ const initTahunExpo = () => {
             tahun: props.tahunExpo.tahun,
             deskripsi: props.tahunExpo.deskripsi,
         };
-        console.log('Using tahunExpo from props:', tahunExpoData.value);
+        // console.log('Using tahunExpo from props:', tahunExpoData.value);
     } else {
         // Fallback ke tahun sekarang
         const currentYear = new Date().getFullYear().toString();
@@ -47,7 +47,7 @@ const initTahunExpo = () => {
             tahun: currentYear,
             deskripsi: `SELAMAT DATANG DI WEBSITE EXPO TECHNOPRENEURSHIP ${currentYear}.`,
         };
-        console.log('Using default tahunExpo:', tahunExpoData.value);
+        // console.log('Using default tahunExpo:', tahunExpoData.value);
     }
 };
 

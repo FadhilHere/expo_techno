@@ -59,19 +59,19 @@ const formatPrice = (price: number) => {
 };
 
 // Membuat URL WhatsApp untuk menghubungi tenant
-const whatsappLink = computed(() => {
-    if (!props.tenant.whatsapp_tenant) return null;
+// const whatsappLink = computed(() => {
+//     if (!props.tenant.whatsapp_tenant) return null;
 
-    let number = props.tenant.whatsapp_tenant;
-    if (number.startsWith('0')) {
-        number = '62' + number.substring(1);
-    }
-    if (!number.startsWith('62')) {
-        number = '62' + number;
-    }
+//     let number = props.tenant.whatsapp_tenant;
+//     if (number.startsWith('0')) {
+//         number = '62' + number.substring(1);
+//     }
+//     if (!number.startsWith('62')) {
+//         number = '62' + number;
+//     }
 
-    return `https://wa.me/${number}`;
-});
+//     return `https://wa.me/${number}`;
+// });
 
 // Order methods
 const addToOrder = (product: Product) => {

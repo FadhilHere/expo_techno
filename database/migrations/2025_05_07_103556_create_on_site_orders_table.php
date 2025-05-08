@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
             $table->string('nama_pembeli');
             $table->decimal('total_amount', 12, 2);
-            $table->date('tanggal_pembelian');
+            $table->timestamp('tanggal_pembelian');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->text('catatan')->nullable();
             $table->timestamps();

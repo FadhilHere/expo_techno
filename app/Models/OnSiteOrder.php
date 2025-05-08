@@ -31,7 +31,7 @@ class OnSiteOrder extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'tanggal_pembelian' => 'date',
+        'tanggal_pembelian' => 'timestamp',
         'total_amount' => 'decimal:2',
     ];
 
