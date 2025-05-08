@@ -55,6 +55,7 @@ const isActive = (path: string) => {
 const navItems = [
     { label: 'Home', path: '/' },
     { label: 'Expo History', path: '/expo-history' },
+    { label: 'Tenant Feedback', path: '/tenant-feedback' },
     { label: 'About Us', path: '/about' },
 ];
 </script>

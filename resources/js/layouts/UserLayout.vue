@@ -3,7 +3,7 @@ import AppNavbar from '@/components/AppNavbar.vue';
 import NavMobile from '@/components/NavMobile.vue';
 import { onMounted, ref } from 'vue';
 import { Head } from '@inertiajs/vue3';
-import { Menu, Home, Info, History, Moon, Sun } from 'lucide-vue-next';
+import { Menu, Home, Info, History, Moon, Sun, MessageCircleHeart } from 'lucide-vue-next';
 import { useMediaQuery } from '@vueuse/core';
 import { Button } from '@/components/ui/button';
 
@@ -70,6 +70,7 @@ const currentYear = new Date().getFullYear();
 const navItems = [
     { title: 'Home', url: '/', icon: Home },
     { title: 'Expo History', url: '/expo-history', icon: History },
+    { title: 'Tenant Feedback', url: '/tenant-feedback', icon: MessageCircleHeart },
     { title: 'About Us', url: '/about', icon: Info },
 ];
 </script>
