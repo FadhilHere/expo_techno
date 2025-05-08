@@ -136,26 +136,35 @@ class TenantMahasiswaController extends Controller
     }
 
     // Menghapus Product
-    public function deleteProduct($id)
+    public function deleteProduct($id, $productId)
     {
-        $product = Product::find($id)
-        ->where('tenant_id', auth()->user()->tenant_id)
-        ->firstOrFail();
+        Log::info('Attempting to delete product', [
+            'tenant_id' => $id,
+            'product_id' => $productId,
+            'user_id' => auth()->id()
+        ]);
 
-        // Check if product has pre-order items
-        if($product->preOrderItems()->count() > 0){
-            return redirect()->back()->with('error', 'Tidak dapat menghapus produk yang memiliki pre-order');
-        }
+        $product = Product::where('id', $productId)
+            ->where('tenant_id', auth()->user()->tenant_id)
+            ->firstOrFail();
 
         // Delete photo if exists
         if($product->foto_produk && Storage::disk('public')->exists($product->foto_produk)){
+            Log::info('Deleting product photo', [
+                'product_id' => $productId,
+                'photo_path' => $product->foto_produk
+            ]);
             Storage::disk('public')->delete($product->foto_produk);
         }
 
         $product->delete();
 
-        return redirect()->route('mahasiswa.tenant', auth()->user()->tenant_id)->with('success', 'Produk berhasil dihapus');
+        Log::info('Product deleted successfully', [
+            'product_id' => $productId,
+            'product_name' => $product->nama_produk
+        ]);
 
+        return redirect()->route('mahasiswa.tenant', auth()->user()->tenant_id)->with('success', 'Produk berhasil dihapus');
     }
 
 

@@ -264,8 +264,10 @@ const saveProduct = () => {
 const deleteProduct = () => {
     if (tenant.value?.id && deleteProductId.value) {
         router.delete(`/mahasiswa/tenant/${tenant.value.id}/products/${deleteProductId.value}`, {
+            preserveScroll: true,
             onSuccess: function () {
                 showDeleteProductDialog.value = false;
+                deleteProductId.value = null;
 
                 // Show success alert
                 alert.value = {
@@ -274,7 +276,8 @@ const deleteProduct = () => {
                     message: 'Produk berhasil dihapus',
                 };
             },
-            onError: function () {
+            onError: function (errors) {
+                console.error('Delete error:', errors);
                 alert.value = {
                     show: true,
                     type: 'error',
