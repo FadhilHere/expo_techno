@@ -38,12 +38,16 @@ import {
   getSortedRowModel,
   useVueTable,
 } from '@tanstack/vue-table'
-import { ArrowUpDown, ChevronDown, Eye, Clock, CheckCircle2, XCircle, AlertCircle } from 'lucide-vue-next'
-import { h, ref, onMounted, onBeforeUnmount } from 'vue'
+import { ArrowUpDown, ChevronDown, Eye, Clock, CheckCircle2, XCircle, AlertCircle, Package, Mail, Phone } from 'lucide-vue-next'
+import { h, ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import { usePage, router } from '@inertiajs/vue3'
 import axios from 'axios'
 import Alert from '@/components/Alert.vue';
+
+// Get current user data
+const currentUser = computed(() => usePage().props.auth?.user);
+const hasTenant = computed(() => currentUser.value?.tenant_id);
 
 const alert = ref({
   show: false,
@@ -280,7 +284,29 @@ const table = useVueTable({
       { label: 'Pre-Order', href: null }
     ]"
   >
-    <div class="w-full">
+    <!-- No Tenant State -->
+    <div v-if="!hasTenant" class="flex flex-col items-center justify-center py-12 text-center">
+      <div class="mb-4 rounded-full bg-orange-100 p-4">
+        <Package class="h-10 w-10 text-orange-600" />
+      </div>
+      <h2 class="mb-2 text-2xl font-bold">Belum Bisa Mengelola Pre-Order</h2>
+      <p class="text-muted-foreground mb-6 max-w-md">
+        Kamu belum memiliki tenant yang terdaftar. Tenant akan diassign oleh admin Technologia. Silakan hubungi admin untuk informasi lebih lanjut.
+      </p>
+      <div class="flex flex-col items-center gap-3 sm:flex-row">
+        <Button variant="outline" class="gap-2">
+          <Mail class="h-4 w-4" />
+          <span>techno@example.com</span>
+        </Button>
+        <Button variant="outline" class="gap-2">
+          <Phone class="h-4 w-4" />
+          <span>+62 812-3456-7890</span>
+        </Button>
+      </div>
+    </div>
+
+    <!-- Pre-Order Management (when tenant exists) -->
+    <div v-else class="w-full">
       <div class="flex gap-2 items-center py-4">
         <Input
           class="max-w-sm"

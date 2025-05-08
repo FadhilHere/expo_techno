@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\TenantController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\TahunExpoController;
+use App\Http\Controllers\Admin\ExpoHistoryController;
 // Mahasiswa imports
 use App\Http\Controllers\Mahasiswa\DashboardMahasiswaController;
 use App\Http\Controllers\Mahasiswa\TenantMahasiswaController;
@@ -21,12 +22,15 @@ use App\Http\Controllers\Mahasiswa\OnSiteOrderMahasiswaController;
 use App\Http\Controllers\User\PreOrderController;
 use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\User\AboutusController;
+use App\Http\Controllers\User\ExpoUserController;
 
 // Guest User Routes
 Route::get('/', [HomeController::class, 'showHomeView'])->name('home');
 Route::get('/about', [AboutusController::class, 'showAboutusView'])->name('about');
 Route::get('/tenant/{id}', [HomeController::class, 'showTenantDetail'])->name('tenant.detail');
 Route::post('/pre-order', [PreOrderController::class, 'InsertPreOrder'])->name('pre-order.insert');
+Route::get('/expo-history', [ExpoUserController::class, 'showExpoHistory'])->name('expo-history');
+Route::get('/expo-history/{id}', [ExpoUserController::class, 'show'])->name('expo-history.show');
 Route::get('/login', [AuthController::class, 'showLogin'])
     ->name('login');
 Route::post('/login', [AuthController::class, 'login'])
@@ -73,6 +77,14 @@ Route::middleware(['isLogin:admin,super_admin'])->prefix('admin')->group(functio
     Route::get('/pre-orders', [PreOrderAdminController::class, 'showPreOrders'])->name('pre-orders');
     Route::put('/pre-orders/{id}/status', [PreOrderAdminController::class, 'updatePreOrderStatus'])->name('pre-orders.status.update');
     Route::delete('/pre-orders/{id}', [PreOrderAdminController::class, 'deletePreOrder'])->name('pre-orders.delete');
+    // Expo History Routes
+    Route::get('/expo-history', [ExpoHistoryController::class, 'index'])->name('expo-history.index');
+    Route::get('/expo-history/tahun-expo', [ExpoHistoryController::class, 'getTahunExpo'])->name('expo-history.tahun-expo');
+    Route::post('/expo-history', [ExpoHistoryController::class, 'store'])->name('expo-history.store');
+    Route::post('/expo-history/{id}', [ExpoHistoryController::class, 'update'])->name('expo-history.update');
+    Route::delete('/expo-history/{id}', [ExpoHistoryController::class, 'destroy'])->name('expo-history.delete');
+    Route::delete('/expo-history/image/{id}', [ExpoHistoryController::class, 'deleteImage'])->name('expo-history.image.delete');
+    Route::post('/expo-history/image/{id}/caption', [ExpoHistoryController::class, 'updateImageCaption'])->name('expo-history.image.caption');
 });
 
 // Mahasiswa Routes - Using isLogin middleware with role parameter

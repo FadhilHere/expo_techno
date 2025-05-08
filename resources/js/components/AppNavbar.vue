@@ -57,6 +57,10 @@ const applyTheme = (newTheme: string) => {
                             </NavigationMenuItem>
 
                             <NavigationMenuItem>
+                                <NavigationMenuLink href="/expo-history"> Expo History </NavigationMenuLink>
+                            </NavigationMenuItem>
+
+                            <NavigationMenuItem>
                                 <NavigationMenuLink href="/about"> About Us </NavigationMenuLink>
                             </NavigationMenuItem>
                         </NavigationMenuList>

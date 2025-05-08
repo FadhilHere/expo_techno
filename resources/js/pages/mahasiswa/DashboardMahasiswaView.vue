@@ -4,8 +4,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { usePage } from '@inertiajs/vue3';
 import type { LucideIcon } from 'lucide-vue-next';
-import { Clock, DollarSign, FileText, ShoppingCart } from 'lucide-vue-next';
+import { Clock, DollarSign, FileText, ShoppingCart, Package, Mail, Phone } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { Button } from '@/components/ui/button';
 
 // Interfaces for type safety
 interface TenantInfo {
@@ -54,7 +55,8 @@ const props = defineProps<{
 
 // Get current user data
 const currentUser = computed(() => usePage().props.auth?.user as User);
-const tenantName = computed(() => currentUser.value?.tenant?.nama_tenant || 'Tenant');
+const hasTenant = computed(() => currentUser.value?.tenant_id);
+// const tenantName = computed(() => currentUser.value?.tenant?.nama_tenant || 'Tenant');
 
 // Function untuk memformat currency
 const formatCurrency = (value: number) => {
@@ -166,103 +168,127 @@ const getOrderTypeColor = (type: string) => {
 <template>
     <AuthLayout title="Dashboard Tim Mahasiswa" description="Kelola pesanan tenant anda">
         <div class="space-y-6 p-6">
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <!-- Tiga card pertama -->
-                <Card v-for="(stat, index) in stats.slice(0, 3)" :key="index" class="overflow-hidden">
-                    <CardHeader class="pb-2">
-                        <div class="flex items-center justify-between">
-                            <CardTitle class="text-sm font-medium">{{ stat.title }}</CardTitle>
-                            <div :class="`rounded-full p-2 ${stat.color.split(' ')[0]} ${stat.color.split(' ')[1]}`">
-                                <component :is="stat.icon" class="h-4 w-4" />
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">{{ stat.value }}</div>
-                        <p class="text-muted-foreground mt-1 text-xs">{{ stat.description }}</p>
-                    </CardContent>
-                </Card>
+            <!-- No Tenant State -->
+            <div v-if="!hasTenant" class="flex flex-col items-center justify-center py-12 text-center">
+                <div class="mb-4 rounded-full bg-orange-100 p-4">
+                    <Package class="h-10 w-10 text-orange-600" />
+                </div>
+                <h2 class="mb-2 text-2xl font-bold">Selamat Datang di Dashboard Mahasiswa</h2>
+                <p class="text-muted-foreground mb-6 max-w-md">
+                    Kamu belum memiliki tenant yang terdaftar. Tenant akan diassign oleh admin Technologia. Silakan hubungi admin untuk informasi lebih lanjut.
+                </p>
+                <div class="flex flex-col items-center gap-3 sm:flex-row">
+                    <Button variant="outline" class="gap-2">
+                        <Mail class="h-4 w-4" />
+                        <span>techno@example.com</span>
+                    </Button>
+                    <Button variant="outline" class="gap-2">
+                        <Phone class="h-4 w-4" />
+                        <span>+62 812-3456-7890</span>
+                    </Button>
+                </div>
+            </div>
 
-                <!-- Card keempat (Breakdown Pesanan) -->
-                <Card class="overflow-hidden">
-                    <CardHeader class="pb-2">
-                        <div class="flex items-center justify-between">
-                            <CardTitle class="text-sm font-medium">{{ stats[3].title }}</CardTitle>
-                            <div :class="`rounded-full p-2 ${stats[3].color.split(' ')[0]} ${stats[3].color.split(' ')[1]}`">
-                                <component :is="stats[3].icon" class="h-4 w-4" />
+            <!-- Dashboard Content (when tenant exists) -->
+            <div v-else class="space-y-6">
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <!-- Tiga card pertama -->
+                    <Card v-for="(stat, index) in stats.slice(0, 3)" :key="index" class="overflow-hidden">
+                        <CardHeader class="pb-2">
+                            <div class="flex items-center justify-between">
+                                <CardTitle class="text-sm font-medium">{{ stat.title }}</CardTitle>
+                                <div :class="`rounded-full p-2 ${stat.color.split(' ')[0]} ${stat.color.split(' ')[1]}`">
+                                    <component :is="stat.icon" class="h-4 w-4" />
+                                </div>
                             </div>
-                        </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="text-2xl font-bold">{{ stat.value }}</div>
+                            <p class="text-muted-foreground mt-1 text-xs">{{ stat.description }}</p>
+                        </CardContent>
+                    </Card>
+
+                    <!-- Card keempat (Breakdown Pesanan) -->
+                    <Card class="overflow-hidden">
+                        <CardHeader class="pb-2">
+                            <div class="flex items-center justify-between">
+                                <CardTitle class="text-sm font-medium">{{ stats[3].title }}</CardTitle>
+                                <div :class="`rounded-full p-2 ${stats[3].color.split(' ')[0]} ${stats[3].color.split(' ')[1]}`">
+                                    <component :is="stats[3].icon" class="h-4 w-4" />
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="flex flex-col space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm">Pre-Order:</span>
+                                    <span
+                                        class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300"
+                                    >
+                                        {{ props.tenantStats?.preOrderCount || 0 }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm">On-Site:</span>
+                                    <span
+                                        class="rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-800 dark:bg-teal-900 dark:text-teal-300"
+                                    >
+                                        {{ props.tenantStats?.onSiteOrderCount || 0 }}
+                                    </span>
+                                </div>
+                            </div>
+                            <p class="text-muted-foreground mt-2 text-xs">{{ stats[3].description }}</p>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <!-- Recent Orders Table -->
+                <Card>
+                    <CardHeader>
+                        <CardTitle>5 Pesanan Terbaru</CardTitle>
+                        <CardDescription>Pesanan yang baru masuk untuk tenant anda</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div class="flex flex-col space-y-2">
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm">Pre-Order:</span>
-                                <span
-                                    class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300"
-                                >
-                                    {{ props.tenantStats?.preOrderCount || 0 }}
-                                </span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm">On-Site:</span>
-                                <span
-                                    class="rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-800 dark:bg-teal-900 dark:text-teal-300"
-                                >
-                                    {{ props.tenantStats?.onSiteOrderCount || 0 }}
-                                </span>
-                            </div>
-                        </div>
-                        <p class="text-muted-foreground mt-2 text-xs">{{ stats[3].description }}</p>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>No</TableHead>
+                                    <TableHead>Tanggal</TableHead>
+                                    <TableHead>Pemesan</TableHead>
+                                    <TableHead>WhatsApp</TableHead>
+                                    <TableHead>Total</TableHead>
+                                    <TableHead>Tipe</TableHead>
+                                    <TableHead>Status</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow v-for="(order, index) in recentOrders" :key="order.id">
+                                    <TableCell>{{ index + 1 }}</TableCell>
+                                    <TableCell>{{ formatDate(order.created_at) }}</TableCell>
+                                    <TableCell>{{ order.nama_pemesan }}</TableCell>
+                                    <TableCell>{{ order.nomor_wa }}</TableCell>
+                                    <TableCell>{{ formatCurrency(order.total) }}</TableCell>
+                                    <TableCell>
+                                        <span :class="`rounded-full px-2 py-1 text-xs font-medium ${getOrderTypeColor(order.type)}`">
+                                            {{ getOrderTypeLabel(order.type) }}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell>
+                                        <span :class="`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(order.status_pesanan)}`">
+                                            {{ getStatusText(order.status_pesanan) }}
+                                        </span>
+                                    </TableCell>
+                                </TableRow>
+                                <!-- Tampilkan pesan jika tidak ada order -->
+                                <TableRow v-if="!recentOrders.length">
+                                    <TableCell colspan="7" class="py-6 text-center text-gray-500"> Belum ada pesanan masuk </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
                     </CardContent>
                 </Card>
             </div>
-
-            <!-- Recent Orders Table -->
-            <Card>
-                <CardHeader>
-                    <CardTitle>5 Pesanan Terbaru</CardTitle>
-                    <CardDescription>Pesanan yang baru masuk untuk tenant anda</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>No</TableHead>
-                                <TableHead>Tanggal</TableHead>
-                                <TableHead>Pemesan</TableHead>
-                                <TableHead>WhatsApp</TableHead>
-                                <TableHead>Total</TableHead>
-                                <TableHead>Tipe</TableHead>
-                                <TableHead>Status</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            <TableRow v-for="(order, index) in recentOrders" :key="order.id">
-                                <TableCell>{{ index + 1 }}</TableCell>
-                                <TableCell>{{ formatDate(order.created_at) }}</TableCell>
-                                <TableCell>{{ order.nama_pemesan }}</TableCell>
-                                <TableCell>{{ order.nomor_wa }}</TableCell>
-                                <TableCell>{{ formatCurrency(order.total) }}</TableCell>
-                                <TableCell>
-                                    <span :class="`rounded-full px-2 py-1 text-xs font-medium ${getOrderTypeColor(order.type)}`">
-                                        {{ getOrderTypeLabel(order.type) }}
-                                    </span>
-                                </TableCell>
-                                <TableCell>
-                                    <span :class="`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(order.status_pesanan)}`">
-                                        {{ getStatusText(order.status_pesanan) }}
-                                    </span>
-                                </TableCell>
-                            </TableRow>
-                            <!-- Tampilkan pesan jika tidak ada order -->
-                            <TableRow v-if="!recentOrders.length">
-                                <TableCell colspan="7" class="py-6 text-center text-gray-500"> Belum ada pesanan masuk </TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
         </div>
     </AuthLayout>
 </template>

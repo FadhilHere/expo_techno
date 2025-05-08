@@ -3,8 +3,9 @@ import AppNavbar from '@/components/AppNavbar.vue';
 import NavMobile from '@/components/NavMobile.vue';
 import { onMounted, ref } from 'vue';
 import { Head } from '@inertiajs/vue3';
-import { Menu, Home, Info } from 'lucide-vue-next';
+import { Menu, Home, Info, History, Moon, Sun } from 'lucide-vue-next';
 import { useMediaQuery } from '@vueuse/core';
+import { Button } from '@/components/ui/button';
 
 // Props untuk title dan description
 defineProps({
@@ -23,7 +24,7 @@ const isMobile = useMediaQuery('(max-width: 768px)');
 const mobileSidebarOpen = ref(false);
 
 // Theme state
-const theme = ref('light');
+const theme = ref<'light' | 'dark'>('light');
 
 // Set initial theme based on local storage or system preference
 onMounted(() => {
@@ -31,7 +32,7 @@ onMounted(() => {
     const storedTheme = localStorage.getItem('theme');
 
     if (storedTheme) {
-        theme.value = storedTheme;
+        theme.value = storedTheme as 'light' | 'dark';
         applyTheme(theme.value);
     } else {
         // Check system preference
@@ -40,6 +41,13 @@ onMounted(() => {
         applyTheme(theme.value);
     }
 });
+
+// Toggle theme function
+const toggleTheme = () => {
+    theme.value = theme.value === 'light' ? 'dark' : 'light';
+    applyTheme(theme.value);
+    localStorage.setItem('theme', theme.value);
+};
 
 // Apply theme to document
 const applyTheme = (newTheme: string) => {
@@ -61,6 +69,7 @@ const currentYear = new Date().getFullYear();
 // Navigation items for mobile sidebar with icons
 const navItems = [
     { title: 'Home', url: '/', icon: Home },
+    { title: 'Expo History', url: '/expo-history', icon: History },
     { title: 'About Us', url: '/about', icon: Info },
 ];
 </script>
@@ -103,18 +112,32 @@ const navItems = [
 
         <!-- Mobile sidebar -->
         <div
-            class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 transform transition-transform duration-300 shadow-lg"
+            class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 transform transition-transform duration-300 shadow-lg flex flex-col"
             :class="mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'"
         >
             <!-- Header -->
-            <div class="flex items-center justify-center border-b h-16 px-4">
-                <div class="flex items-center justify-center">
+            <div class="flex items-center justify-between border-b h-16 px-4 flex-shrink-0">
+                <div class="flex items-center">
                     <img src="/assets/Logo_polos.png" alt="Logo" class="h-8" />
                 </div>
+                <!-- Theme toggle in sidebar -->
+                <Button variant="outline" size="icon" @click="toggleTheme" class="mr-2" aria-label="Toggle theme">
+                    <Sun v-if="theme === 'dark'" class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all" />
+                    <Moon v-else class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all" />
+                </Button>
             </div>
 
-            <!-- Navigation using NavMobile component -->
-            <NavMobile :items="navItems" />
+            <!-- Navigation using NavMobile component - with flex-1 to take remaining space -->
+            <div class="flex-1 overflow-y-auto">
+                <NavMobile :items="navItems" />
+            </div>
+
+            <!-- Login button in sidebar - always at bottom -->
+            <div class="border-t p-4 flex-shrink-0">
+                <Button variant="default" class="w-full" as="a" href="/login">
+                    Login
+                </Button>
+            </div>
         </div>
 
         <!-- Main content -->

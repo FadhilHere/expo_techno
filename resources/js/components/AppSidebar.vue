@@ -8,7 +8,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroupLabel, SidebarHeader, SidebarRail } from '@/components/ui/sidebar';
 
 import { usePage } from '@inertiajs/vue3';
-import { PieChart, ShoppingCart, Square, Store, TimerIcon, User } from 'lucide-vue-next';
+import { PieChart, ShoppingCart, Square, Store, TimerIcon, User, BookOpen } from 'lucide-vue-next';
 import { computed, onMounted } from 'vue';
 
 const props = withDefaults(defineProps<SidebarProps>(), {
@@ -92,6 +92,12 @@ const data = {
             title: 'Pre-Order',
             url: '/admin/pre-orders',
             icon: ShoppingCart,
+            roles: ['admin', 'super_admin'],
+        },
+        {
+            title: 'Expo History',
+            url: '/admin/expo-history',
+            icon: BookOpen,
             roles: ['admin', 'super_admin'],
         },
         {

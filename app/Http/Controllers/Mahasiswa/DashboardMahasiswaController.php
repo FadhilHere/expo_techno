@@ -16,9 +16,17 @@ class DashboardMahasiswaController extends Controller
         // Dapatkan user yang sedang login
         $user = Auth::user();
 
-        // Pastikan user adalah tim_mhs dan memiliki tenant_id
-        if ($user->role !== 'mahasiswa' || !$user->tenant_id) {
+        // Pastikan user adalah tim_mhs
+        if ($user->role !== 'mahasiswa') {
             return redirect()->route('dashboard'); // Redirect ke dashboard utama jika bukan tim_mhs
+        }
+
+        // Jika user tidak memiliki tenant, tampilkan dashboard kosong
+        if (!$user->tenant_id) {
+            return Inertia::render('mahasiswa/DashboardMahasiswaView', [
+                'tenantStats' => null,
+                'recentOrders' => [],
+            ]);
         }
 
         $tenantId = $user->tenant_id;

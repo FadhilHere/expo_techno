@@ -24,6 +24,11 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Mail, Package, Phone } from 'lucide-vue-next';
+
+// Get current user data
+const currentUser = computed(() => usePage().props.auth?.user);
+const hasTenant = computed(() => currentUser.value?.tenant_id);
 
 // Define interfaces for type safety
 interface Product {
@@ -409,325 +414,349 @@ watch(() => selectedTenant.value, (newValue) => {
 <template>
     <AuthLayout title="Pemesanan Onsite" description="Kelola pemesanan onsite untuk tenant" :breadcrumbs="breadcrumbItems">
         <div class="p-6">
-            <div class="mb-6 flex items-center justify-between">
-                <h1 class="text-2xl font-bold">Pemesanan Onsite</h1>
+            <!-- No Tenant State -->
+            <div v-if="!hasTenant" class="flex flex-col items-center justify-center py-12 text-center">
+                <div class="mb-4 rounded-full bg-orange-100 p-4">
+                    <Package class="h-10 w-10 text-orange-600" />
+                </div>
+                <h2 class="mb-2 text-2xl font-bold">Belum Bisa Mengelola Pesanan Onsite</h2>
+                <p class="text-muted-foreground mb-6 max-w-md">
+                    Kamu belum memiliki tenant yang terdaftar. Tenant akan diassign oleh admin Technologia. Silakan hubungi admin untuk informasi lebih lanjut.
+                </p>
+                <div class="flex flex-col items-center gap-3 sm:flex-row">
+                    <Button variant="outline" class="gap-2">
+                        <Mail class="h-4 w-4" />
+                        <span>techno@example.com</span>
+                    </Button>
+                    <Button variant="outline" class="gap-2">
+                        <Phone class="h-4 w-4" />
+                        <span>+62 812-3456-7890</span>
+                    </Button>
+                </div>
             </div>
 
-            <!-- Alert Notification -->
-            <Alert v-model:show="alert.show" :type="alert.type" :message="alert.message" />
+            <!-- Onsite Order Management (when tenant exists) -->
+            <div v-else>
+                <div class="mb-6 flex items-center justify-between">
+                    <h1 class="text-2xl font-bold">Pemesanan Onsite</h1>
+                </div>
 
-            <!-- Main Content Grid - 3 Columns on larger screens -->
-            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <!-- Order Input Section - Left Column (2/3 width on large screens) -->
-                <div class="space-y-6 lg:col-span-2">
-                    <!-- Display Tenant Info -->
-                    <div v-if="selectedTenant" class="rounded-xl border bg-white p-6 shadow-sm">
-                        <div class="flex flex-col items-start gap-6 md:flex-row">
-                            <!-- Logo -->
-                            <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-gray-100 md:h-32 md:w-32">
-                                <img
-                                    :src="selectedTenant.logo_url"
-                                    :alt="selectedTenant.nama_tenant"
-                                    class="h-full w-full object-cover"
-                                    onerror="this.src='/assets/no_image.png'"
-                                />
-                            </div>
+                <!-- Alert Notification -->
+                <Alert v-model:show="alert.show" :type="alert.type" :message="alert.message" />
 
-                            <!-- Info -->
-                            <div class="flex-1">
-                                <h2 class="mb-3 text-2xl font-bold md:text-3xl">{{ selectedTenant.nama_tenant }}</h2>
-
-                                <div v-if="selectedTenant.deskripsi" class="mb-6 text-gray-600">
-                                    <p>{{ selectedTenant.deskripsi }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- No Tenant Selected Message -->
-                    <div v-if="!selectedTenant" class="rounded-xl border bg-white p-8 text-center shadow-sm">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="mx-auto mb-4 h-12 w-12 text-gray-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                        </svg>
-                        <h2 class="mb-1 text-xl font-semibold">Tidak Ada Tenant</h2>
-                        <p class="text-gray-600">Anda tidak terhubung dengan tenant manapun. Silakan hubungi administrator.</p>
-                    </div>
-
-                    <!-- Products Section -->
-                    <div v-if="selectedTenant" class="rounded-xl border bg-white p-6 shadow-sm">
-                        <h2 class="mb-4 text-lg font-semibold">Produk {{ selectedTenant.nama_tenant }}</h2>
-
-                        <div
-                            v-if="selectedTenant.products && selectedTenant.products.length > 0"
-                            class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
-                        >
-                            <!-- Product Card -->
-                            <div
-                                v-for="product in selectedTenant.products"
-                                :key="product.id"
-                                class="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md"
-                            >
-                                <!-- Product Image -->
-                                <div class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
+                <!-- Main Content Grid - 3 Columns on larger screens -->
+                <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    <!-- Order Input Section - Left Column (2/3 width on large screens) -->
+                    <div class="space-y-6 lg:col-span-2">
+                        <!-- Display Tenant Info -->
+                        <div v-if="selectedTenant" class="rounded-xl border bg-white p-6 shadow-sm">
+                            <div class="flex flex-col items-start gap-6 md:flex-row">
+                                <!-- Logo -->
+                                <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-gray-100 md:h-32 md:w-32">
                                     <img
-                                        :src="product.foto_url"
-                                        :alt="product.nama_produk"
-                                        class="h-full w-full object-contain"
+                                        :src="selectedTenant.logo_url"
+                                        :alt="selectedTenant.nama_tenant"
+                                        class="h-full w-full object-cover"
                                         onerror="this.src='/assets/no_image.png'"
                                     />
                                 </div>
 
-                                <!-- Product Info -->
-                                <div class="flex flex-1 flex-col p-4">
-                                    <h3 class="mb-2 text-lg font-semibold line-clamp-1">
-                                        {{ product.nama_produk }}
-                                    </h3>
-                                    <p class="mb-3 font-bold text-gray-700">{{ formatPrice(product.harga) }}</p>
+                                <!-- Info -->
+                                <div class="flex-1">
+                                    <h2 class="mb-3 text-2xl font-bold md:text-3xl">{{ selectedTenant.nama_tenant }}</h2>
 
-                                    <p v-if="product.deskripsi"
-                                       class="product-description mb-6 text-sm text-gray-600 line-clamp-2 cursor-help"
-                                       :data-tippy-content="product.deskripsi">
-                                        {{ product.deskripsi }}
-                                    </p>
-
-                                    <!-- Quantity Controls -->
-                                    <div class="mt-auto flex items-center justify-center space-x-6">
-                                        <button
-                                            @click="removeFromOrder(product)"
-                                            :disabled="getProductQuantity(product.id) === 0"
-                                            class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                <path
-                                                    fill-rule="evenodd"
-                                                    d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                                                    clip-rule="evenodd"
-                                                />
-                                            </svg>
-                                        </button>
-                                        <div class="w-10 text-center font-medium">
-                                            {{ getProductQuantity(product.id) }}
-                                        </div>
-                                        <button
-                                            @click="addToOrder(product)"
-                                            class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-50"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                <path
-                                                    fill-rule="evenodd"
-                                                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                                    clip-rule="evenodd"
-                                                />
-                                            </svg>
-                                        </button>
+                                    <div v-if="selectedTenant.deskripsi" class="mb-6 text-gray-600">
+                                        <p>{{ selectedTenant.deskripsi }}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- No Products -->
-                        <div v-else class="rounded-xl bg-gray-50 p-8 text-center">
-                            <div class="mb-4 text-5xl">📦</div>
-                            <h3 class="mb-2 text-xl font-semibold">Belum ada produk</h3>
-                            <p class="text-gray-600">Tenant ini belum menambahkan produk yang dijual.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Order Summary and Form - Right Column (1/3 width on large screens) -->
-                <div class="space-y-6">
-                    <!-- Order Form Card -->
-                    <div class="sticky top-6 rounded-xl border bg-white p-6 shadow-sm">
-                        <h2 class="mb-4 flex items-center text-lg font-semibold">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <!-- No Tenant Selected Message -->
+                        <div v-if="!selectedTenant" class="rounded-xl border bg-white p-8 text-center shadow-sm">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="mx-auto mb-4 h-12 w-12 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2"
-                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                 />
                             </svg>
-                            Pesanan
-                        </h2>
+                            <h2 class="mb-1 text-xl font-semibold">Tidak Ada Tenant</h2>
+                            <p class="text-gray-600">Anda tidak terhubung dengan tenant manapun. Silakan hubungi administrator.</p>
+                        </div>
 
-                        <!-- Order Items -->
-                        <div v-if="orderItems.length > 0" class="mb-4 space-y-4">
+                        <!-- Products Section -->
+                        <div v-if="selectedTenant" class="rounded-xl border bg-white p-6 shadow-sm">
+                            <h2 class="mb-4 text-lg font-semibold">Produk {{ selectedTenant.nama_tenant }}</h2>
+
                             <div
-                                v-for="item in orderItems"
-                                :key="item.id"
-                                class="flex items-center justify-between border-b border-gray-100 pb-4 last:border-0"
+                                v-if="selectedTenant.products && selectedTenant.products.length > 0"
+                                class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
                             >
-                                <div class="flex-1">
-                                    <h3 class="font-semibold">{{ item.nama_produk }}</h3>
-                                    <p class="text-sm text-gray-600">{{ formatPrice(item.harga) }} × {{ item.quantity }}</p>
+                                <!-- Product Card -->
+                                <div
+                                    v-for="product in selectedTenant.products"
+                                    :key="product.id"
+                                    class="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md"
+                                >
+                                    <!-- Product Image -->
+                                    <div class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
+                                        <img
+                                            :src="product.foto_url"
+                                            :alt="product.nama_produk"
+                                            class="h-full w-full object-contain"
+                                            onerror="this.src='/assets/no_image.png'"
+                                        />
+                                    </div>
+
+                                    <!-- Product Info -->
+                                    <div class="flex flex-1 flex-col p-4">
+                                        <h3 class="mb-2 text-lg font-semibold line-clamp-1">
+                                            {{ product.nama_produk }}
+                                        </h3>
+                                        <p class="mb-3 font-bold text-gray-700">{{ formatPrice(product.harga) }}</p>
+
+                                        <p v-if="product.deskripsi"
+                                           class="product-description mb-6 text-sm text-gray-600 line-clamp-2 cursor-help"
+                                           :data-tippy-content="product.deskripsi">
+                                            {{ product.deskripsi }}
+                                        </p>
+
+                                        <!-- Quantity Controls -->
+                                        <div class="mt-auto flex items-center justify-center space-x-6">
+                                            <button
+                                                @click="removeFromOrder(product)"
+                                                :disabled="getProductQuantity(product.id) === 0"
+                                                class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path
+                                                        fill-rule="evenodd"
+                                                        d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                                                        clip-rule="evenodd"
+                                                    />
+                                                </svg>
+                                            </button>
+                                            <div class="w-10 text-center font-medium">
+                                                {{ getProductQuantity(product.id) }}
+                                            </div>
+                                            <button
+                                                @click="addToOrder(product)"
+                                                class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-50"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path
+                                                        fill-rule="evenodd"
+                                                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                                        clip-rule="evenodd"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="text-right">
-                                    <p class="font-bold">{{ formatPrice(item.harga * item.quantity) }}</p>
-                                </div>
                             </div>
 
-                            <!-- Total -->
-                            <div class="flex items-center justify-between border-t border-gray-200 pt-4">
-                                <p class="text-lg font-bold">Total</p>
-                                <p class="text-xl font-bold">{{ formatPrice(totalPrice) }}</p>
+                            <!-- No Products -->
+                            <div v-else class="rounded-xl bg-gray-50 p-8 text-center">
+                                <div class="mb-4 text-5xl">📦</div>
+                                <h3 class="mb-2 text-xl font-semibold">Belum ada produk</h3>
+                                <p class="text-gray-600">Tenant ini belum menambahkan produk yang dijual.</p>
                             </div>
-                        </div>
-
-                        <!-- Empty order state -->
-                        <div v-else class="mb-4 rounded-lg bg-gray-50 p-4 text-center">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="mx-auto mb-2 h-12 w-12 text-gray-400"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                                />
-                            </svg>
-                            <p class="text-gray-500">Belum ada item dalam pesanan</p>
-                        </div>
-
-                        <!-- Order Form -->
-                        <form @submit.prevent="submitOrder" class="mt-6 space-y-4">
-                            <div>
-                                <Label for="buyer-name" class="text-sm font-medium">Nama Pembeli</Label>
-                                <Input id="buyer-name" v-model="orderForm.nama_pembeli" type="text" required placeholder="Masukkan nama pembeli" />
-                            </div>
-
-                            <div>
-                                <Label for="order-notes" class="text-sm font-medium">Catatan (Opsional)</Label>
-                                <Textarea id="order-notes" v-model="orderForm.catatan" placeholder="Tambahkan catatan untuk pesanan ini" rows="3" />
-                            </div>
-
-                            <Button
-                                type="submit"
-                                class="w-full"
-                                :disabled="orderItems.length === 0 || !selectedTenant || !orderForm.nama_pembeli || isSubmitting"
-                            >
-                                <template v-if="isSubmitting">
-                                    <svg class="mr-2 h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path
-                                            class="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        ></path>
-                                    </svg>
-                                    Memproses...
-                                </template>
-                                <template v-else> Proses Pesanan </template>
-                            </Button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order History Section -->
-            <div class="mt-10 rounded-xl border bg-white p-6 shadow-sm">
-                <div class="mb-6 flex flex-wrap items-center justify-between">
-                    <h2 class="text-lg font-semibold">Riwayat Pemesanan Onsite</h2>
-                    <div class="flex space-x-2">
-                        <div class="relative">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="absolute top-3 left-3 h-4 w-4 text-gray-400"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                />
-                            </svg>
-                            <Input v-model="searchQuery" class="w-64 pl-10" placeholder="Cari nama produk atau pembeli..." />
                         </div>
                     </div>
-                </div>
 
-                <!-- Orders Table -->
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>No</TableHead>
-                            <TableHead>Tanggal</TableHead>
-                            <TableHead>Nama Pembeli</TableHead>
-                            <TableHead>Total</TableHead>
-                            <TableHead>Aksi</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow v-for="(order, index) in paginatedOrders" :key="order.id">
-                            <TableCell>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</TableCell>
-                            <TableCell>{{ formatDate(order.tanggal_pembelian) }}</TableCell>
-                            <TableCell>{{ order.nama_pembeli }}</TableCell>
-                            <TableCell>{{ formatPrice(order.total_amount) }}</TableCell>
-                            <TableCell>
-                                <div class="flex space-x-2">
-                                    <Button variant="outline" size="sm" @click="viewOrderDetails(order)"> Detail </Button>
-                                    <Button variant="destructive" size="sm" @click="confirmDeleteOrder(order.id)">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <!-- Order Summary and Form - Right Column (1/3 width on large screens) -->
+                    <div class="space-y-6">
+                        <!-- Order Form Card -->
+                        <div class="sticky top-6 rounded-xl border bg-white p-6 shadow-sm">
+                            <h2 class="mb-4 flex items-center text-lg font-semibold">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                                    />
+                                </svg>
+                                Pesanan
+                            </h2>
+
+                            <!-- Order Items -->
+                            <div v-if="orderItems.length > 0" class="mb-4 space-y-4">
+                                <div
+                                    v-for="item in orderItems"
+                                    :key="item.id"
+                                    class="flex items-center justify-between border-b border-gray-100 pb-4 last:border-0"
+                                >
+                                    <div class="flex-1">
+                                        <h3 class="font-semibold">{{ item.nama_produk }}</h3>
+                                        <p class="text-sm text-gray-600">{{ formatPrice(item.harga) }} × {{ item.quantity }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold">{{ formatPrice(item.harga * item.quantity) }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Total -->
+                                <div class="flex items-center justify-between border-t border-gray-200 pt-4">
+                                    <p class="text-lg font-bold">Total</p>
+                                    <p class="text-xl font-bold">{{ formatPrice(totalPrice) }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Empty order state -->
+                            <div v-else class="mb-4 rounded-lg bg-gray-50 p-4 text-center">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="mx-auto mb-2 h-12 w-12 text-gray-400"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                                    />
+                                </svg>
+                                <p class="text-gray-500">Belum ada item dalam pesanan</p>
+                            </div>
+
+                            <!-- Order Form -->
+                            <form @submit.prevent="submitOrder" class="mt-6 space-y-4">
+                                <div>
+                                    <Label for="buyer-name" class="text-sm font-medium">Nama Pembeli</Label>
+                                    <Input id="buyer-name" v-model="orderForm.nama_pembeli" type="text" required placeholder="Masukkan nama pembeli" />
+                                </div>
+
+                                <div>
+                                    <Label for="order-notes" class="text-sm font-medium">Catatan (Opsional)</Label>
+                                    <Textarea id="order-notes" v-model="orderForm.catatan" placeholder="Tambahkan catatan untuk pesanan ini" rows="3" />
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    class="w-full"
+                                    :disabled="orderItems.length === 0 || !selectedTenant || !orderForm.nama_pembeli || isSubmitting"
+                                >
+                                    <template v-if="isSubmitting">
+                                        <svg class="mr-2 h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                            />
+                                                class="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            ></path>
                                         </svg>
-                                    </Button>
-                                </div>
-                            </TableCell>
-                        </TableRow>
-                        <TableRow v-if="paginatedOrders.length === 0">
-                            <TableCell colspan="5" class="h-40 text-center text-gray-500"> Belum ada data pesanan onsite </TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
+                                        Memproses...
+                                    </template>
+                                    <template v-else> Proses Pesanan </template>
+                                </Button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
 
-                <!-- Pagination -->
-                <div class="mt-4 flex items-center justify-between">
-                    <div class="text-sm text-gray-500">Menampilkan {{ paginatedOrders.length }} dari {{ filteredOrders.length }} data</div>
-                    <div class="flex items-center space-x-2">
-                        <Button variant="outline" size="sm" :disabled="currentPage === 1" @click="previousPage"> Sebelumnya </Button>
+                <!-- Order History Section -->
+                <div class="mt-10 rounded-xl border bg-white p-6 shadow-sm">
+                    <div class="mb-6 flex flex-wrap items-center justify-between">
+                        <h2 class="text-lg font-semibold">Riwayat Pemesanan Onsite</h2>
+                        <div class="flex space-x-2">
+                            <div class="relative">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="absolute top-3 left-3 h-4 w-4 text-gray-400"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                    />
+                                </svg>
+                                <Input v-model="searchQuery" class="w-64 pl-10" placeholder="Cari nama produk atau pembeli..." />
+                            </div>
+                        </div>
+                    </div>
 
-                        <span v-for="page in totalPages" :key="page">
-                            <Button
-                                size="sm"
-                                :variant="page === currentPage ? 'default' : 'outline'"
-                                @click="goToPage(page)"
-                                class="mx-1 hidden sm:inline-flex"
-                                v-if="page <= 5 || page === totalPages || Math.abs(page - currentPage) <= 1"
-                            >
-                                {{ page }}
+                    <!-- Orders Table -->
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>No</TableHead>
+                                <TableHead>Tanggal</TableHead>
+                                <TableHead>Nama Pembeli</TableHead>
+                                <TableHead>Total</TableHead>
+                                <TableHead>Aksi</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow v-for="(order, index) in paginatedOrders" :key="order.id">
+                                <TableCell>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</TableCell>
+                                <TableCell>{{ formatDate(order.tanggal_pembelian) }}</TableCell>
+                                <TableCell>{{ order.nama_pembeli }}</TableCell>
+                                <TableCell>{{ formatPrice(order.total_amount) }}</TableCell>
+                                <TableCell>
+                                    <div class="flex space-x-2">
+                                        <Button variant="outline" size="sm" @click="viewOrderDetails(order)"> Detail </Button>
+                                        <Button variant="destructive" size="sm" @click="confirmDeleteOrder(order.id)">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                />
+                                            </svg>
+                                        </Button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow v-if="paginatedOrders.length === 0">
+                                <TableCell colspan="5" class="h-40 text-center text-gray-500"> Belum ada data pesanan onsite </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+
+                    <!-- Pagination -->
+                    <div class="mt-4 flex items-center justify-between">
+                        <div class="text-sm text-gray-500">Menampilkan {{ paginatedOrders.length }} dari {{ filteredOrders.length }} data</div>
+                        <div class="flex items-center space-x-2">
+                            <Button variant="outline" size="sm" :disabled="currentPage === 1" @click="previousPage"> Sebelumnya </Button>
+
+                            <span v-for="page in totalPages" :key="page">
+                                <Button
+                                    size="sm"
+                                    :variant="page === currentPage ? 'default' : 'outline'"
+                                    @click="goToPage(page)"
+                                    class="mx-1 hidden sm:inline-flex"
+                                    v-if="page <= 5 || page === totalPages || Math.abs(page - currentPage) <= 1"
+                                >
+                                    {{ page }}
+                                </Button>
+                                <span
+                                    v-else-if="(page === 6 && currentPage <= 4) || (page === totalPages - 1 && currentPage >= totalPages - 3)"
+                                    class="mx-1"
+                                    >...</span
+                                >
+                            </span>
+
+                            <Button variant="outline" size="sm" :disabled="currentPage === totalPages || totalPages === 0" @click="nextPage">
+                                Selanjutnya
                             </Button>
-                            <span
-                                v-else-if="(page === 6 && currentPage <= 4) || (page === totalPages - 1 && currentPage >= totalPages - 3)"
-                                class="mx-1"
-                                >...</span
-                            >
-                        </span>
-
-                        <Button variant="outline" size="sm" :disabled="currentPage === totalPages || totalPages === 0" @click="nextPage">
-                            Selanjutnya
-                        </Button>
+                        </div>
                     </div>
                 </div>
             </div>
