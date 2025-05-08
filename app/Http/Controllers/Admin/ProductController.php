@@ -64,7 +64,7 @@ class ProductController extends Controller
             'nama_produk' => 'required|string|max:255',
             'harga' => 'required|numeric|min:0',
             'deskripsi' => 'nullable|string',
-            'foto_produk' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5000',
+            'foto_produk' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
         // Create new product
@@ -96,7 +96,7 @@ class ProductController extends Controller
             'nama_produk' => 'required|string|max:255',
             'harga' => 'required|numeric|min:0',
             'deskripsi' => 'nullable|string',
-            'foto_produk' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto_produk' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ], [
             'nama_produk.required' => 'Nama produk harus diisi.',
             'harga.required' => 'Harga produk harus diisi.',

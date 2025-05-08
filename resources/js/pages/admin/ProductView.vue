@@ -535,7 +535,7 @@ const backToTenants = () => {
                             <p v-if="validationErrors.foto_produk" class="mt-1 text-xs text-red-500">
                                 {{ validationErrors.foto_produk }}
                             </p>
-                            <p class="mt-1 text-xs text-gray-500">Ukuran maksimal 5MB. Format: JPG, PNG, GIF</p>
+                            <!-- <p class="mt-1 text-xs text-gray-500">Ukuran maksimal 5MB. Format: JPG, PNG, GIF</p> -->
                         </div>
 
                         <div class="flex justify-end space-x-2">

@@ -471,7 +471,7 @@ const deleteProduct = () => {
 
                     <!-- File Upload -->
                     <Input id="product-image" type="file" accept="image/*" @change="handleProductImageChange" />
-                    <p class="text-xs text-gray-500">Format: JPG, PNG, GIF. Ukuran maksimal: 5MB</p>
+                    <!-- <p class="text-xs text-gray-500">Format: JPG, PNG, GIF. Ukuran maksimal: 5MB</p> -->
                 </div>
             </div>
             <div class="flex justify-end space-x-2">

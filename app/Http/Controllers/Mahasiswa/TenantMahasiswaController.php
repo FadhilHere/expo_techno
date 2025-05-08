@@ -65,7 +65,7 @@ class TenantMahasiswaController extends Controller
             'nama_produk' => 'required|string|max:255',
             'harga' => 'required|numeric|min:0',
             'deskripsi' => 'nullable|string',
-            'foto_produk' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5000',
+            'foto_produk' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
         $product = new Product();
@@ -100,7 +100,7 @@ class TenantMahasiswaController extends Controller
             'nama_produk' => 'required|string|max:255',
             'harga' => 'required|numeric|min:0',
             'deskripsi' => 'nullable|string',
-            'foto_produk' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5000',
+            'foto_produk' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
         $product = Product::where('tenant_id', auth()->user()->tenant_id)
