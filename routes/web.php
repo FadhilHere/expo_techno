@@ -2,6 +2,7 @@
 
 // Import controllers
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Mahasiswa\OnSiteOrderMahasiswaController;
 use Illuminate\Support\Facades\Route;
 // Super Admin imports
 use App\Http\Controllers\SuperAdmin\AccountController;
@@ -92,6 +93,10 @@ Route::middleware(['isLogin:mahasiswa'])->prefix('mahasiswa')->group(function ()
     Route::get('/pre-orders', [PreOrderMahasiswaController::class, 'showPreOrderMahasiswa'])->name('mahasiswa.pre-orders');
     Route::get('/pre-orders/{id}', [PreOrderMahasiswaController::class, 'showPreOrderMahasiswaDetail'])->name('mahasiswa.pre-orders.detail');
     Route::patch('/pre-orders/{id}/status', [PreOrderMahasiswaController::class, 'updateStatusPreOrder'])->name('mahasiswa.pre-orders.status.update');
+
+    Route::get('/on-site-orders', [OnSiteOrderMahasiswaController::class, 'index'])->name('mahasiswa.on-site-orders');
+    Route::post('/on-site-orders', [OnSiteOrderMahasiswaController::class, 'store'])->name('mahasiswa.on-site-orders.store');
+    Route::delete('/on-site-orders/{id}', [OnSiteOrderMahasiswaController::class, 'destroy'])->name('mahasiswa.on-site-orders.delete');
 });
 
 require __DIR__ . '/settings.php';

@@ -7,9 +7,9 @@ import NavSimple from '@/components/NavSimple.vue';
 import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroupLabel, SidebarHeader, SidebarRail } from '@/components/ui/sidebar';
 
+import { usePage } from '@inertiajs/vue3';
 import { PieChart, ShoppingCart, Square, Store, TimerIcon, User } from 'lucide-vue-next';
 import { computed, onMounted } from 'vue';
-import { usePage } from '@inertiajs/vue3';
 
 const props = withDefaults(defineProps<SidebarProps>(), {
     collapsible: 'icon',
@@ -26,7 +26,7 @@ const currentUser = computed(() => {
 
         // Direct access for debugging
         // if (pageProps && pageProps.auth && pageProps.auth.user) {
-            // console.log('DIRECT USER ACCESS SUCCESSFUL');
+        // console.log('DIRECT USER ACCESS SUCCESSFUL');
         // }
 
         const user = pageProps.auth?.user;
@@ -115,6 +115,12 @@ const data = {
         {
             title: 'PreOrder Mahasiswa',
             url: '/mahasiswa/pre-orders',
+            icon: ShoppingCart,
+            roles: ['mahasiswa'],
+        },
+        {
+            title: 'Pemesanan Onsite',
+            url: '/mahasiswa/on-site-orders',
             icon: ShoppingCart,
             roles: ['mahasiswa'],
         },
@@ -238,8 +244,9 @@ const formatRoleForDisplay = (role: string): string => {
             return 'Mahasiswa';
         default:
             // For any other roles, capitalize first letter of each word and replace underscores with spaces
-            return role.split('_')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            return role
+                .split('_')
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
                 .join(' ');
     }
 };
@@ -276,7 +283,7 @@ const userData = computed(() => {
 
 // Create a computed property that filters navigation items based on user role
 const simpleNav = computed(() => {
-    return data.allNavItems.filter(item => {
+    return data.allNavItems.filter((item) => {
         // If the item has no roles restriction, show it to all users
         if (!item.roles) return true;
 
