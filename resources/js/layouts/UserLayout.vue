@@ -112,38 +112,43 @@ const navItems = [
 
         <!-- Mobile sidebar -->
         <div
-            class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 transform transition-transform duration-300 shadow-lg flex flex-col"
+            class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 transform transition-transform duration-300 shadow-lg"
             :class="mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'"
         >
-            <!-- Header -->
-            <div class="flex items-center justify-between border-b h-16 px-4 flex-shrink-0">
-                <div class="flex items-center">
-                    <img src="/assets/Logo_polos.png" alt="Logo" class="h-8" />
+            <div class="flex flex-col h-full">
+                <!-- Header -->
+                <div class="flex items-center justify-between border-b h-16 px-4 flex-shrink-0">
+                    <div class="flex items-center">
+                        <img src="/assets/Logo_polos.png" alt="Logo" class="h-8" />
+                    </div>
+                    <!-- Theme toggle in sidebar -->
+                    <Button variant="outline" size="icon" @click="toggleTheme" class="mr-2" aria-label="Toggle theme">
+                        <Sun v-if="theme === 'dark'" class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all" />
+                        <Moon v-else class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all" />
+                    </Button>
                 </div>
-                <!-- Theme toggle in sidebar -->
-                <Button variant="outline" size="icon" @click="toggleTheme" class="mr-2" aria-label="Toggle theme">
-                    <Sun v-if="theme === 'dark'" class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all" />
-                    <Moon v-else class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all" />
-                </Button>
-            </div>
 
-            <!-- Navigation using NavMobile component - with flex-1 to take remaining space -->
-            <div class="flex-1 overflow-y-auto">
-                <NavMobile :items="navItems" />
-            </div>
+                <!-- Main content area with fixed height -->
+                <div class="flex flex-col h-[calc(100vh-4rem)]">
+                    <!-- Navigation area with overflow -->
+                    <div class="flex-1 overflow-y-auto">
+                        <NavMobile :items="navItems" />
+                    </div>
 
-            <!-- Login button in sidebar - always at bottom -->
-            <div class="border-t p-4 flex-shrink-0">
-                <Button variant="default" class="w-full" as="a" href="/login">
-                    Login
-                </Button>
+                    <!-- Login button - always at bottom -->
+                    <div class="mt-auto border-t p-4 bg-white dark:bg-gray-900">
+                        <Button variant="default" class="w-full" as="a" href="/login">
+                            Login
+                        </Button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Main content -->
-        <div class="flex flex-col min-h-screen">
+        <!-- Mobile Layout -->
+        <div v-if="isMobile" class="min-h-screen flex flex-col">
             <!-- Header with hamburger menu -->
-            <header class="bg-white dark:bg-gray-900 border-b h-16 flex items-center px-4">
+            <header class="bg-white dark:bg-gray-900 border-b h-16 flex items-center px-4 sticky top-0 z-40">
                 <div class="flex items-center justify-between w-full">
                     <div class="flex items-center space-x-3">
                         <!-- Hamburger button -->
@@ -161,10 +166,7 @@ const navItems = [
 
             <!-- Main content -->
             <main class="flex-1">
-                <!-- Hero section -->
                 <slot name="hero"></slot>
-
-                <!-- Main content -->
                 <div class="px-4 py-6">
                     <slot></slot>
                 </div>
