@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import Alert from '@/components/Alert.vue';
@@ -205,7 +205,8 @@ const handleAdditionalImagesChange = (event: Event) => {
     }
 };
 
-const openAddDialog = () => {
+// Reset form function
+const resetForm = () => {
     formData.value = {
         tahun_expo_id: '',
         title: '',
@@ -217,12 +218,18 @@ const openAddDialog = () => {
     };
     coverImagePreview.value = null;
     additionalImagePreviews.value = [];
+    selectedHistory.value = null;
+    imagesToDelete.value = [];
+};
+
+const openAddDialog = () => {
+    resetForm();
     showAddDialog.value = true;
 };
 
 const openEditDialog = (history: History) => {
+    resetForm(); // Reset first before setting new data
     selectedHistory.value = history;
-    imagesToDelete.value = []; // Reset images to delete
     formData.value = {
         tahun_expo_id: history.tahun_expo_id.toString(),
         title: history.title,
@@ -336,6 +343,13 @@ const removeExistingImage = (imageId: number) => {
     // Remove image from UI only
     selectedHistory.value.images = selectedHistory.value.images.filter(img => img.id !== imageId);
 };
+
+// Watch for dialog close
+watch(showDialog, (newValue) => {
+    if (!newValue) {
+        resetForm();
+    }
+});
 </script>
 
 <template>
@@ -564,10 +578,10 @@ const removeExistingImage = (imageId: number) => {
                 <DialogContent class="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>
-                            {{ selectedHistory ? 'Edit History' : 'Tambah History' }}
+                            {{ showEditDialog ? 'Edit History' : 'Tambah History' }}
                         </DialogTitle>
                         <DialogDescription>
-                            {{ selectedHistory ? 'Edit informasi history yang sudah ada' : 'Tambahkan history expo baru' }}
+                            {{ showEditDialog ? 'Edit informasi history yang sudah ada' : 'Tambahkan history expo baru' }}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -729,7 +743,7 @@ const removeExistingImage = (imageId: number) => {
                             <Button
                                 type="button"
                                 variant="outline"
-                                @click="showAddDialog = showEditDialog = false"
+                                @click="resetForm(); showDialog = false"
                             >
                                 Batal
                             </Button>
