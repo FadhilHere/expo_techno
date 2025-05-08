@@ -1,14 +1,7 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
-import { Link } from '@inertiajs/vue3';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import UserLayout from '@/layouts/UserLayout.vue';
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
-} from '@/components/ui/carousel';
+import { Head, Link } from '@inertiajs/vue3';
 
 interface Image {
     id: number;
@@ -35,7 +28,7 @@ const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
     });
 };
 </script>
@@ -61,15 +54,11 @@ const formatDate = (dateString: string) => {
 
             <!-- Hero image -->
             <div class="relative h-[60vh] w-full overflow-hidden rounded-xl">
-                <img
-                    :src="history.cover_image_url"
-                    :alt="history.title"
-                    class="h-full w-full object-cover"
-                />
+                <img :src="history.cover_image_url" :alt="history.title" class="h-full w-full object-cover" />
                 <div class="absolute inset-0 bg-gradient-to-b from-black/60 to-black/30"></div>
-                <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
+                <div class="absolute right-0 bottom-0 left-0 p-8 text-white">
                     <h1 class="text-3xl font-bold sm:text-4xl">{{ history.title }}</h1>
-                    <p class="mt-2 text-lg">Expo Technologia {{ history.tahun_expo }}</p>
+                    <p class="mt-2 text-lg">Expo Technopreneurship {{ history.tahun_expo }}</p>
                     <p class="mt-1 text-sm opacity-80">{{ formatDate(history.published_at) }}</p>
                 </div>
             </div>
@@ -88,15 +77,8 @@ const formatDate = (dateString: string) => {
                         <CarouselContent>
                             <CarouselItem v-for="image in history.images" :key="image.id">
                                 <div class="relative aspect-video">
-                                    <img
-                                        :src="image.image_url"
-                                        :alt="image.caption"
-                                        class="h-full w-full rounded-lg object-cover"
-                                    />
-                                    <div
-                                        v-if="image.caption"
-                                        class="absolute bottom-0 left-0 right-0 bg-black/50 p-4 text-white"
-                                    >
+                                    <img :src="image.image_url" :alt="image.caption" class="h-full w-full rounded-lg object-cover" />
+                                    <div v-if="image.caption" class="absolute right-0 bottom-0 left-0 bg-black/50 p-4 text-white">
                                         {{ image.caption }}
                                     </div>
                                 </div>

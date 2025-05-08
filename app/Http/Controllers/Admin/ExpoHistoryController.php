@@ -72,9 +72,9 @@ class ExpoHistoryController extends Controller
                 'tahun_expo_id' => 'required|exists:tahun_expo,id',
                 'title' => 'required|string|max:255',
                 'content' => 'required|string',
-                'cover_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+                'cover_image' => 'required|image|mimes:jpeg,png,jpg',
                 'published_at' => 'required|date',
-                'additional_images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'additional_images.*' => 'nullable|image|mimes:jpeg,png,jpg',
                 'captions.*' => 'nullable|string|max:255',
             ]);
 
@@ -144,9 +144,9 @@ class ExpoHistoryController extends Controller
                 'tahun_expo_id' => 'required|exists:tahun_expo,id',
                 'title' => 'required|string|max:255',
                 'content' => 'required|string',
-                'cover_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'cover_image' => 'nullable|image|mimes:jpeg,png,jpg',
                 'published_at' => 'required|date',
-                'additional_images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'additional_images.*' => 'nullable|image|mimes:jpeg,png,jpg',
                 'captions.*' => 'nullable|string|max:255',
                 'images_to_delete' => 'nullable|array',
                 'images_to_delete.*' => 'numeric'
