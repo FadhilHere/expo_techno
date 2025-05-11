@@ -79,9 +79,9 @@ const scrollToTenants = (event: Event) => {
                 <!-- Left Content -->
                 <div>
                     <!-- Tambahkan logo SI dan HIMA di sini, di bagian atas konten kiri -->
-                    <div class="mb-2 flex items-center">
-                        <img src="assets/Logo_SI.png" alt="Logo SI" class="h-20 w-auto" />
-                        <img src="assets/LOGO_HIMA.png" alt="Logo HIMA" class="h-25 w-auto" />
+                    <div class="mb-2 flex items-center space-x-2">
+                        <img src="assets/Logo_SI.png" alt="Logo SI" class="h-25 w-auto" />
+                        <img src="assets/LOGO_HIMA.png" alt="Logo HIMA" class="h-22 w-auto" />
                     </div>
 
                     <!-- Responsive title that displays differently on mobile -->
