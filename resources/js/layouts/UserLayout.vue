@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import AppNavbar from '@/components/AppNavbar.vue';
 import NavMobile from '@/components/NavMobile.vue';
-import { onMounted, ref } from 'vue';
-import { Head } from '@inertiajs/vue3';
-import { Menu, Home, Info, History, Moon, Sun, MessageCircleHeart } from 'lucide-vue-next';
-import { useMediaQuery } from '@vueuse/core';
 import { Button } from '@/components/ui/button';
+import { Head } from '@inertiajs/vue3';
+import { useMediaQuery } from '@vueuse/core';
+import { History, Home, Info, Menu, MessageCircleHeart, Moon, Sun } from 'lucide-vue-next';
+import { onMounted, ref } from 'vue';
 
 // Props untuk title dan description
 defineProps({
@@ -23,23 +23,18 @@ defineProps({
 const isMobile = useMediaQuery('(max-width: 768px)');
 const mobileSidebarOpen = ref(false);
 
-// Theme state
+// Theme state - force light theme
 const theme = ref<'light' | 'dark'>('light');
 
-// Set initial theme based on local storage or system preference
+// Force light theme on mount - completely ignore any stored preferences
 onMounted(() => {
-    // Check if theme is stored in localStorage
-    const storedTheme = localStorage.getItem('theme');
-
-    if (storedTheme) {
-        theme.value = storedTheme as 'light' | 'dark';
-        applyTheme(theme.value);
-    } else {
-        // Check system preference
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        theme.value = prefersDark ? 'dark' : 'light';
-        applyTheme(theme.value);
-    }
+    // Always force light theme
+    theme.value = 'light';
+    // Clear any existing theme preferences
+    localStorage.removeItem('theme');
+    // Force apply light theme immediately
+    document.documentElement.classList.remove('dark');
+    applyTheme('light');
 });
 
 // Toggle theme function
@@ -107,18 +102,18 @@ const navItems = [
         <!-- Mobile sidebar overlay backdrop - now using backdrop-blur instead of bg-black -->
         <div
             v-if="mobileSidebarOpen"
-            class="fixed inset-0 backdrop-blur-sm bg-black/30 z-40 transition-all duration-300"
+            class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
             @click="toggleMobileSidebar"
         ></div>
 
         <!-- Mobile sidebar -->
         <div
-            class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 transform transition-transform duration-300 shadow-lg"
+            class="fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-lg transition-transform duration-300 dark:bg-gray-900"
             :class="mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'"
         >
-            <div class="flex flex-col h-full">
+            <div class="flex h-full flex-col">
                 <!-- Header -->
-                <div class="flex items-center justify-between border-b h-16 px-4 flex-shrink-0">
+                <div class="flex h-16 flex-shrink-0 items-center justify-between border-b px-4">
                     <div class="flex items-center">
                         <img src="/assets/Logo_polos.png" alt="Logo" class="h-8" />
                     </div>
@@ -130,33 +125,28 @@ const navItems = [
                 </div>
 
                 <!-- Main content area with fixed height -->
-                <div class="flex flex-col h-[calc(100vh-4rem)]">
+                <div class="flex h-[calc(100vh-4rem)] flex-col">
                     <!-- Navigation area with overflow -->
                     <div class="flex-1 overflow-y-auto">
                         <NavMobile :items="navItems" />
                     </div>
 
                     <!-- Login button - always at bottom -->
-                    <div class="mt-auto border-t p-4 bg-white dark:bg-gray-900">
-                        <Button variant="default" class="w-full" as="a" href="/login">
-                            Login
-                        </Button>
+                    <div class="mt-auto border-t bg-white p-4 dark:bg-gray-900">
+                        <Button variant="default" class="w-full" as="a" href="/login"> Login </Button>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Mobile Layout -->
-        <div v-if="isMobile" class="min-h-screen flex flex-col">
+        <div v-if="isMobile" class="flex min-h-screen flex-col">
             <!-- Header with hamburger menu -->
-            <header class="bg-white dark:bg-gray-900 border-b h-16 flex items-center px-4 sticky top-0 z-40">
-                <div class="flex items-center justify-between w-full">
+            <header class="sticky top-0 z-40 flex h-16 items-center border-b bg-white px-4 dark:bg-gray-900">
+                <div class="flex w-full items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <!-- Hamburger button -->
-                        <button
-                            @click="toggleMobileSidebar"
-                            class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none"
-                        >
+                        <button @click="toggleMobileSidebar" class="rounded-md p-2 hover:bg-gray-100 focus:outline-none dark:hover:bg-gray-800">
                             <Menu class="h-6 w-6" />
                         </button>
 
@@ -174,7 +164,7 @@ const navItems = [
             </main>
 
             <!-- Footer -->
-            <footer class="py-4 border-t text-center text-sm text-gray-500">
+            <footer class="border-t py-4 text-center text-sm text-gray-500">
                 <p>© {{ currentYear }} Fadhil Parmata. All rights reserved.</p>
             </footer>
         </div>
