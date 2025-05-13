@@ -30,6 +30,7 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
+
         // Get credentials to check
         $credentials = [
             'username' => $request->username,
@@ -39,6 +40,7 @@ class AuthController extends Controller
 
         // Attempt to authenticate with active status check
         if (Auth::attempt($credentials)) {
+          
             $request->session()->regenerate();
 
             // Get the authenticated user
@@ -53,6 +55,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
+
                 'user' => [
                     'username' => $user->username,
                     'role' => $user->role
@@ -85,7 +88,9 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+
         return redirect()->route('login');
+
     }
 
 }
