@@ -1,25 +1,12 @@
-
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
 import AppSidebar from '@/components/AppSidebar.vue';
-import {
-    SidebarInset,
-    SidebarProvider,
-    SidebarTrigger
-} from '@/components/ui/sidebar';
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
-import { Separator } from '@/components/ui/separator';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
-import { Moon, Sun } from 'lucide-vue-next';
+import { Separator } from '@/components/ui/separator';
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Head } from '@inertiajs/vue3';
-
+import { Moon, Sun } from 'lucide-vue-next';
+import { computed, onMounted, ref } from 'vue';
 
 // Interface for breadcrumb items
 interface BreadcrumbItem {
@@ -31,20 +18,17 @@ interface BreadcrumbItem {
 const props = defineProps({
     title: {
         type: String,
-        default: 'Dashboard'
+        default: 'Dashboard',
     },
     description: {
         type: String,
-        default: 'Welcome to your dashboard'
+        default: 'Welcome to your dashboard',
     },
     breadcrumbs: {
         type: Array as () => BreadcrumbItem[],
-        default: null
-=======
-
-    }
-  });
-
+        default: null,
+    },
+});
 
 // Computed breadcrumbs (akan menggunakan default jika tidak ada yang diberikan)
 const computedBreadcrumbs = computed<BreadcrumbItem[]>(() => {
@@ -55,7 +39,7 @@ const computedBreadcrumbs = computed<BreadcrumbItem[]>(() => {
     // Default breadcrumbs berdasarkan title jika tidak ada yang diberikan
     return [
         { label: 'Menu', href: null },
-        { label: props.title, href: null }
+        { label: props.title, href: null },
     ];
 });
 
@@ -105,10 +89,12 @@ const applyTheme = (newTheme: string) => {
         <AppSidebar />
 
         <!-- SidebarInset menampung konten utama dengan padding yang sesuai -->
-        <SidebarInset class="flex flex-col min-h-screen">
+        <SidebarInset class="flex min-h-screen flex-col">
             <!-- Header dengan breadcrumb dan tombol trigger sidebar -->
-            <header class="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-                <div class="flex items-center justify-between w-full px-4">
+            <header
+                class="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
+            >
+                <div class="flex w-full items-center justify-between px-4">
                     <div class="flex items-center gap-2">
                         <SidebarTrigger class="-ml-1" />
                         <Separator orientation="vertical" class="mr-2 h-4" />
@@ -129,9 +115,7 @@ const applyTheme = (newTheme: string) => {
                                     </BreadcrumbItem>
 
                                     <!-- Add separator between items -->
-                                    <BreadcrumbSeparator
-                                        v-if="index < computedBreadcrumbs.length - 1"
-                                    />
+                                    <BreadcrumbSeparator v-if="index < computedBreadcrumbs.length - 1" />
                                 </template>
                             </BreadcrumbList>
                         </Breadcrumb>
@@ -139,27 +123,27 @@ const applyTheme = (newTheme: string) => {
 
                     <!-- Theme Toggle Button -->
                     <Button variant="outline" size="icon" @click="toggleTheme" aria-label="Toggle theme">
-                        <Sun v-if="theme === 'dark'" class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />
-                        <Moon v-else class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />
+                        <Sun v-if="theme === 'dark'" class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all" />
+                        <Moon v-else class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all" />
                     </Button>
                 </div>
             </header>
 
             <!-- Main content area -->
-            <div class="flex-1 flex flex-col p-6">
+            <div class="flex flex-1 flex-col p-6">
                 <div class="mb-6">
                     <h1 class="text-2xl font-semibold">{{ title }}</h1>
-                    <p class="text-sm text-muted-foreground">{{ description }}</p>
+                    <p class="text-muted-foreground text-sm">{{ description }}</p>
                 </div>
 
                 <!-- Slot untuk konten dari page yang menggunakan layout ini -->
-                <div class="space-y-6 flex-1">
+                <div class="flex-1 space-y-6">
                     <slot></slot>
                 </div>
             </div>
 
             <!-- Footer -->
-            <footer class="py-4 px-6 border-t text-center text-sm text-muted-foreground">
+            <footer class="text-muted-foreground border-t px-6 py-4 text-center text-sm">
                 <p>© {{ currentYear }} Fadhil Parmata. All rights reserved.</p>
             </footer>
         </SidebarInset>
