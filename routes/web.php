@@ -1,33 +1,62 @@
 <?php
 
+// Import controllers
+use App\Http\Controllers\Auth\AuthController;
+use Illuminate\Support\Facades\Route;
+// Super Admin imports
+use App\Http\Controllers\SuperAdmin\AccountController;
+// Admin imports
 use App\Http\Controllers\Admin\KategoriTenantController;
 use App\Http\Controllers\Admin\PreOrderAdminController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\TenantController;
-use App\Http\Controllers\User\PreOrderController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\TahunExpoController;
+use App\Http\Controllers\Admin\ExpoHistoryController;
+use App\Http\Controllers\Admin\TenantFeedbackController;
+// Mahasiswa imports
+use App\Http\Controllers\Mahasiswa\DashboardMahasiswaController;
+use App\Http\Controllers\Mahasiswa\TenantMahasiswaController;
+use App\Http\Controllers\Mahasiswa\PreOrderMahasiswaController;
+use App\Http\Controllers\Mahasiswa\OnSiteOrderMahasiswaController;
+// User imports
+use App\Http\Controllers\User\PreOrderController;
 use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\User\AboutusController;
-use Inertia\Inertia;
-use function Pest\Laravel\get;
+use App\Http\Controllers\User\ExpoUserController;
+use App\Http\Controllers\User\TenantFeedbackUserController;
 
 // Guest User Routes
+// Home Page
 Route::get('/', [HomeController::class, 'showHomeView'])->name('home');
+// About Page
 Route::get('/about', [AboutusController::class, 'showAboutusView'])->name('about');
+// Tenant Detail Page
 Route::get('/tenant/{id}', [HomeController::class, 'showTenantDetail'])->name('tenant.detail');
+// Pre-Order Functionality
 Route::post('/pre-order', [PreOrderController::class, 'InsertPreOrder'])->name('pre-order.insert');
+// Expo History Pages
+Route::get('/expo-history', [ExpoUserController::class, 'showExpoHistory'])->name('expo-history');
+Route::get('/expo-history/{id}', [ExpoUserController::class, 'show'])->name('expo-history.show');
+// Authentication Routes
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+// Tenant Feedback Pages
+Route::get('/tenant-feedback', [TenantFeedbackUserController::class, 'index'])->name('tenant-feedback');
+Route::get('/tenant-feedback/tahun/{tahunExpoId}', [TenantFeedbackUserController::class, 'getByTahunExpo'])->name('tenant-feedback.by-tahun');
 
-Route::get('/login', [AuthController::class, 'showLogin'])
-    ->name('login');
+// Super Admin Routes - Using isLogin middleware with role parameter
+Route::middleware(['isLogin:super_admin'])->prefix('super-admin')->group(function () {
+    Route::get('/account', [AccountController::class, 'showAccountView'])->name('super-admin.account');
+    Route::post('/account', [AccountController::class, 'insertAccount'])->name('account.insert');
+    Route::put('/account/{id}', [AccountController::class, 'updateAccount'])->name('account.update');
+    Route::delete('/account/{id}', [AccountController::class, 'deleteAccount'])->name('account.delete');
+    Route::post('/account/multiple-status', [AccountController::class, 'updateMultipleAccountStatus'])->name('account.multiple-status');
+    Route::get('/tenants', [AccountController::class, 'getTenantData']);
+});
 
-Route::post('/login', [AuthController::class, 'login'])
-    ->name('login.post');
-
-// Admin Routes - Using isLogin middleware
-Route::middleware(['isLogin'])->prefix('admin')->group(function () {
+// Admin Routes - Using isLogin middleware with role parameter
+Route::middleware(['isLogin:admin,super_admin'])->prefix('admin')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
     // Logout
@@ -56,6 +85,45 @@ Route::middleware(['isLogin'])->prefix('admin')->group(function () {
     Route::get('/pre-orders', [PreOrderAdminController::class, 'showPreOrders'])->name('pre-orders');
     Route::put('/pre-orders/{id}/status', [PreOrderAdminController::class, 'updatePreOrderStatus'])->name('pre-orders.status.update');
     Route::delete('/pre-orders/{id}', [PreOrderAdminController::class, 'deletePreOrder'])->name('pre-orders.delete');
+    // Expo History Routes
+    Route::get('/expo-history', [ExpoHistoryController::class, 'index'])->name('expo-history.index');
+    Route::get('/expo-history/tahun-expo', [ExpoHistoryController::class, 'getTahunExpo'])->name('expo-history.tahun-expo');
+    Route::post('/expo-history', [ExpoHistoryController::class, 'store'])->name('expo-history.store');
+    Route::post('/expo-history/{id}', [ExpoHistoryController::class, 'update'])->name('expo-history.update');
+    Route::delete('/expo-history/{id}', [ExpoHistoryController::class, 'destroy'])->name('expo-history.delete');
+    Route::delete('/expo-history/image/{id}', [ExpoHistoryController::class, 'deleteImage'])->name('expo-history.image.delete');
+    Route::post('/expo-history/image/{id}/caption', [ExpoHistoryController::class, 'updateImageCaption'])->name('expo-history.image.caption');
+    // Tenant Feedback Routes
+    Route::get('/tenant-feedback', [TenantFeedbackController::class, 'index'])->name('tenant-feedback.index');
+    Route::post('/tenant-feedback', [TenantFeedbackController::class, 'store'])->name('tenant-feedback.store');
+    Route::put('/tenant-feedback/{id}', [TenantFeedbackController::class, 'update'])->name('tenant-feedback.update');
+    Route::delete('/tenant-feedback/{id}', [TenantFeedbackController::class, 'destroy'])->name('tenant-feedback.destroy');
+    Route::put('/tenant-feedback/{id}/toggle-active', [TenantFeedbackController::class, 'toggleActive'])->name('tenant-feedback.toggle-active');
+});
+
+// Mahasiswa Routes - Using isLogin middleware with role parameter
+Route::middleware(['isLogin:mahasiswa'])->prefix('mahasiswa')->group(function () {
+
+    // Dashboard Mahasiswa
+    Route::get('/dashboard', [DashboardMahasiswaController::class, 'index'])->name('mahasiswa.dashboard');
+
+    // Tenant Mahasiswa
+    Route::get('/tenant', [TenantMahasiswaController::class, 'showTenantMahasiswa'])->name('mahasiswa.tenant');
+    Route::post('/tenant/{id}/products', [TenantMahasiswaController::class, 'insertProduct'])->name('mahasiswa.tenant.products.add');
+    // For product updates we allow both POST and PUT methods
+    Route::match(['post', 'put'], '/tenant/{id}/products/{productId}', [TenantMahasiswaController::class, 'updateProduct'])
+        ->name('mahasiswa.tenant.products.update');
+    Route::delete('/tenant/{id}/products/{productId}', [TenantMahasiswaController::class, 'deleteProduct'])->name('mahasiswa.tenant.products.delete');
+
+    // Pre Order Mahasiswa
+    Route::get('/pre-orders', [PreOrderMahasiswaController::class, 'showPreOrderMahasiswa'])->name('mahasiswa.pre-orders');
+    Route::get('/pre-orders/{id}', [PreOrderMahasiswaController::class, 'showPreOrderMahasiswaDetail'])->name('mahasiswa.pre-orders.detail');
+    Route::patch('/pre-orders/{id}/status', [PreOrderMahasiswaController::class, 'updateStatusPreOrder'])->name('mahasiswa.pre-orders.status.update');
+
+    // On Site Order Mahasiswa
+    Route::get('/on-site-orders', [OnSiteOrderMahasiswaController::class, 'index'])->name('mahasiswa.on-site-orders');
+    Route::post('/on-site-orders', [OnSiteOrderMahasiswaController::class, 'store'])->name('mahasiswa.on-site-orders.store');
+    Route::delete('/on-site-orders/{id}', [OnSiteOrderMahasiswaController::class, 'destroy'])->name('mahasiswa.on-site-orders.delete');
 });
 
 require __DIR__ . '/settings.php';

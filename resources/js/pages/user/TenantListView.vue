@@ -22,14 +22,32 @@ const props = defineProps<{
     showAllLink?: boolean;
 }>();
 
-// State untuk filter (jika diperlukan di home)
+// State untuk filter dan dropdown
 const selectedKategori = ref('');
+const isOpen = ref(false);
 
 // Computed untuk tenant yang difilter
 const filteredTenants = computed(() => {
     if (!selectedKategori.value) return props.tenants;
 
     return props.tenants.filter((tenant) => tenant.kategori && tenant.kategori === selectedKategori.value);
+});
+
+// Method untuk menangani pemilihan kategori
+const selectKategori = (kategori: string) => {
+    selectedKategori.value = kategori;
+    isOpen.value = false;
+};
+
+// Method untuk toggle dropdown
+const toggleDropdown = () => {
+    isOpen.value = !isOpen.value;
+};
+
+// Method untuk mendapatkan label yang ditampilkan
+const displayLabel = computed(() => {
+    if (!selectedKategori.value) return 'Semua Kategori';
+    return selectedKategori.value;
 });
 </script>
 
@@ -42,17 +60,48 @@ const filteredTenants = computed(() => {
                 <p class="text-muted-foreground">Temukan berbagai UMKM yang berpartisipasi di expo ini</p>
             </div>
 
-            <!-- Filter Category Dropdown (Optional for home) -->
-            <div class="w-full md:w-auto">
-                <select
-                    v-model="selectedKategori"
-                    class="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-gray-200 focus:outline-none md:w-48"
+            <!-- shadcn-style Dropdown -->
+            <div class="relative w-full md:w-auto">
+                <button
+                    @click="toggleDropdown"
+                    class="flex w-full items-center justify-between rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-gray-200 focus:outline-none md:w-48"
                 >
-                    <option value="">Semua Kategori</option>
-                    <option v-for="kategori in kategoriTenants" :key="kategori.id" :value="kategori.nama_kategori">
+                    <span>{{ displayLabel }}</span>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        :class="{ 'rotate-180 transform': isOpen }"
+                    >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div v-if="isOpen" class="absolute z-10 mt-1 w-full rounded-md border border-gray-200 bg-white py-1 shadow-lg md:w-48">
+                    <div
+                        @click="selectKategori('')"
+                        class="block cursor-pointer px-4 py-2 text-sm hover:bg-gray-100"
+                        :class="{ 'bg-gray-100 font-medium': selectedKategori === '' }"
+                    >
+                        Semua Kategori
+                    </div>
+                    <div
+                        v-for="kategori in kategoriTenants"
+                        :key="kategori.id"
+                        @click="selectKategori(kategori.nama_kategori)"
+                        class="block cursor-pointer px-4 py-2 text-sm hover:bg-gray-100"
+                        :class="{ 'bg-gray-100 font-medium': selectedKategori === kategori.nama_kategori }"
+                    >
                         {{ kategori.nama_kategori }}
-                    </option>
-                </select>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -61,23 +110,6 @@ const filteredTenants = computed(() => {
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 <TenantCard v-for="tenant in filteredTenants" :key="tenant.id" :tenant="tenant" />
             </div>
-
-            <!-- Link to all tenants page -->
-            <!-- <div v-if="showAllLink" class="mt-8 text-center">
-                <Link
-                    href="/tenants"
-                    class="inline-flex items-center rounded-full bg-black px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gray-800"
-                >
-                    Lihat Semua UMKM
-                    <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path
-                            fill-rule="evenodd"
-                            d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                            clip-rule="evenodd"
-                        />
-                    </svg>
-                </Link>
-            </div> -->
         </div>
         <div v-else class="rounded-lg bg-gray-50 py-8 text-center">
             <div class="mb-3 text-4xl">🏪</div>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FormattedDescription from '@/components/FormattedDescription.vue'; // Import the new component
 import UserLayout from '@/layouts/UserLayout.vue';
 import { useForm } from '@inertiajs/vue3';
 import tippy from 'tippy.js';
@@ -46,7 +47,7 @@ const orderForm = useForm({
     nama_pemesan: '',
     nomor_wa: '',
     catatan_tambahan: '',
-    items: [] as {id: number, quantity: number}[],
+    items: [] as { id: number; quantity: number }[],
 });
 
 // Format harga ke format rupiah
@@ -57,21 +58,6 @@ const formatPrice = (price: number) => {
         minimumFractionDigits: 0,
     }).format(price);
 };
-
-// Membuat URL WhatsApp untuk menghubungi tenant
-const whatsappLink = computed(() => {
-    if (!props.tenant.whatsapp_tenant) return null;
-
-    let number = props.tenant.whatsapp_tenant;
-    if (number.startsWith('0')) {
-        number = '62' + number.substring(1);
-    }
-    if (!number.startsWith('62')) {
-        number = '62' + number;
-    }
-
-    return `https://wa.me/${number}`;
-});
 
 // Order methods
 const addToOrder = (product: Product) => {
@@ -329,24 +315,9 @@ const accentColor = computed(() => {
 
                             <h1 class="mb-3 text-2xl font-bold md:text-3xl">{{ tenant.nama_tenant }}</h1>
 
+                            <!-- Use FormattedDescription component here -->
                             <div class="mb-6 text-gray-600">
-                                <p>{{ tenant.deskripsi }}</p>
-                            </div>
-
-                            <!-- Contact Info -->
-                            <div v-if="whatsappLink" class="mt-4">
-                                <a
-                                    :href="whatsappLink"
-                                    target="_blank"
-                                    class="inline-flex items-center rounded-lg bg-black px-4 py-2 text-white transition-colors hover:bg-gray-800"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path
-                                            d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"
-                                        />
-                                    </svg>
-                                    Hubungi via WhatsApp
-                                </a>
+                                <FormattedDescription :content="tenant.deskripsi || ''" />
                             </div>
                         </div>
                     </div>

@@ -79,7 +79,7 @@ class TenantController extends Controller
             'nama_tenant' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'whatsapp_tenant' => 'nullable|string|max:20',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5128',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
         $tenant = new Tenant();
@@ -119,7 +119,7 @@ class TenantController extends Controller
             'nama_tenant' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'whatsapp_tenant' => 'nullable|string|max:20',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ], [
             'tahun_expo_id.required' => 'The tahun expo field is required.',
             'tahun_expo_id.exists' => 'The selected tahun expo is invalid.',

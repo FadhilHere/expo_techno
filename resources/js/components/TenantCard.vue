@@ -19,27 +19,28 @@ const limitText = (text: string, limit = 100) => {
     return text.length > limit ? text.substring(0, limit) + '...' : text;
 };
 
-// Setup Tippy.js untuk tooltip
+// Setup Tippy.js untuk tooltip yang lebih baik
 onMounted(() => {
-    if (descriptionRef.value) {
-        tippy(descriptionRef.value, {
-            content: props.tenant.deskripsi || 'Tidak ada deskripsi tersedia untuk UMKM ini.',
-            placement: 'top',
-            theme: 'light',
-            maxWidth: 350,
-            delay: [0, 200],
-            arrow: true,
-            allowHTML: true,
-            interactive: true,
-            // Custom styling untuk tooltip
-            onShow() {
-                // Hanya tampilkan tooltip jika teks sudah dipotong
-                const truncatedText = limitText(props.tenant.deskripsi || '', 100);
-                if (truncatedText === props.tenant.deskripsi) {
-                    return false; // Jangan tampilkan tooltip jika teks tidak dipotong
-                }
-            },
-        });
+    if (descriptionRef.value && props.tenant.deskripsi) {
+        // Hanya tampilkan tooltip jika deskripsi lebih panjang dari limit
+        if (props.tenant.deskripsi.length > 100) {
+            tippy(descriptionRef.value, {
+                content: props.tenant.deskripsi,
+                placement: 'top',
+                theme: 'light',
+                maxWidth: 350,
+                delay: [200, 0], // Tunda munculnya tooltip sedikit
+                arrow: true,
+                allowHTML: false, // Atur ke true jika deskripsi berisi HTML
+                interactive: true,
+                appendTo: document.body, // Pastikan tooltip ditampilkan pada body
+                // Tambahkan styling tambahan
+                onCreate(instance) {
+                    // Tambahkan class untuk style kustom
+                    instance.popper.classList.add('tenant-description-tooltip');
+                },
+            });
+        }
     }
 });
 
@@ -128,6 +129,16 @@ const kategoriBadgeStyle = computed(() => {
     // Menggabungkan class warna
     return `${selectedColor[0]} ${selectedColor[1]} ${selectedColor[2]}`;
 });
+
+// Compute apakah deskripsi perlu tooltip
+const needsTooltip = computed(() => {
+    return props.tenant.deskripsi && props.tenant.deskripsi.length > 100;
+});
+
+// Deskripsi yang sudah diformat untuk tampilan
+const formattedDescription = computed(() => {
+    return limitText(props.tenant.deskripsi || 'Tidak ada deskripsi tersedia untuk UMKM ini.');
+});
 </script>
 
 <template>
@@ -183,9 +194,13 @@ const kategoriBadgeStyle = computed(() => {
 
         <!-- Content Area -->
         <div class="p-5">
-            <!-- Deskripsi dengan Tippy.js tooltip -->
-            <p ref="descriptionRef" class="mb-4 h-12 cursor-help overflow-hidden text-xs leading-relaxed text-gray-600 md:text-sm" @click.stop>
-                {{ limitText(tenant.deskripsi || 'Tidak ada deskripsi tersedia untuk UMKM ini.') }}
+            <!-- Deskripsi dengan Tippy.js tooltip yang diperbaiki -->
+            <p
+                ref="descriptionRef"
+                :class="['mb-4 h-12 overflow-hidden text-xs leading-relaxed text-gray-600 md:text-sm', needsTooltip ? 'cursor-help' : '']"
+                @click.stop
+            >
+                {{ formattedDescription }}
             </p>
 
             <div class="flex items-center justify-between">
@@ -214,3 +229,30 @@ const kategoriBadgeStyle = computed(() => {
         <div :class="[initialsBgColor, 'h-1 w-full']"></div>
     </div>
 </template>
+
+<style>
+/* Tambahkan style untuk tooltip */
+.tippy-box[data-theme~='light'] {
+    background-color: white;
+    color: #333;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    max-width: 350px !important;
+}
+
+.tippy-box[data-theme~='light'] .tippy-arrow {
+    color: white;
+}
+
+.tenant-description-tooltip {
+    z-index: 9999;
+}
+
+.tenant-description-tooltip .tippy-content {
+    padding: 12px;
+    text-align: left;
+}
+</style>

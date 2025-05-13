@@ -37,7 +37,6 @@ class TahunExpoController extends Controller
         $request->validate([
             'tahun' => 'required|string|max:4',
             'deskripsi' => 'nullable|string|max:255',
-            // 'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $tahunExpo = new TahunExpo();
@@ -71,7 +70,6 @@ class TahunExpoController extends Controller
         $validator = validator($request->all(), [
             'tahun' => 'required|string|max:4',
             'deskripsi' => 'nullable|string|max:255',
-            // 'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
             'tahun.required' => 'The tahun field is required.',
         ]);

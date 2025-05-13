@@ -583,7 +583,7 @@ const handleDelete = () => {
                                 <p v-if="validationErrors.logo" class="mt-1 text-xs text-red-500">
                                     {{ validationErrors.logo }}
                                 </p>
-                                <p class="mt-1 text-xs text-gray-500">Ukuran maksimal 5MB. Format: JPG, PNG, GIF</p>
+                                <!-- <p class="mt-1 text-xs text-gray-500">Ukuran maksimal 5MB. Format: JPG, PNG, GIF</p> -->
                             </div>
                         </form>
                     </div>
