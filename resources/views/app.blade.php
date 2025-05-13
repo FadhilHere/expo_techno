@@ -4,11 +4,17 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        {{-- Force light theme as default --}}
+        {{-- Aggressively force light theme --}}
         <script>
             (function() {
-                // Always start with light theme
+                // Remove dark class immediately if exists
                 document.documentElement.classList.remove('dark');
+                // Clear any stored theme preferences
+                if (typeof localStorage !== 'undefined') {
+                    localStorage.removeItem('theme');
+                }
+                // Add light theme marker
+                document.documentElement.setAttribute('data-theme', 'light');
             })();
         </script>
 
@@ -20,6 +26,11 @@
 
             html.dark {
                 background-color: oklch(0.145 0 0);
+            }
+
+            /* Ensure body also has light background */
+            body {
+                background-color: white;
             }
         </style>
 

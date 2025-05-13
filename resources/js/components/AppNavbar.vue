@@ -8,7 +8,7 @@ import { onMounted, ref } from 'vue';
 const theme = ref<'light' | 'dark'>('light');
 const currentPath = ref('');
 
-// Force light theme - ignore localStorage and system preferences
+// Force light theme - completely ignore any stored preferences
 onMounted(() => {
     // Set current path
     currentPath.value = window.location.pathname;
@@ -18,9 +18,12 @@ onMounted(() => {
         currentPath.value = window.location.pathname;
     });
 
-    // Force light theme - no checks, just apply light mode
+    // ALWAYS force light theme on every load
     theme.value = 'light';
-    localStorage.setItem('theme', 'light'); // Save to localStorage too
+    // Clear any existing theme from localStorage
+    localStorage.removeItem('theme');
+    // Force apply light theme immediately
+    document.documentElement.classList.remove('dark');
     applyTheme('light');
 });
 
