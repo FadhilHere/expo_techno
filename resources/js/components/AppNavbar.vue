@@ -4,11 +4,11 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuL
 import { Moon, Sun } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 
-// Theme state - explicitly start with light
+// Theme state - force light theme on initial load
 const theme = ref<'light' | 'dark'>('light');
 const currentPath = ref('');
 
-// Set initial theme based on local storage or system preference
+// Force light theme - ignore localStorage and system preferences
 onMounted(() => {
     // Set current path
     currentPath.value = window.location.pathname;
@@ -18,19 +18,10 @@ onMounted(() => {
         currentPath.value = window.location.pathname;
     });
 
-    // Theme handling - prioritize light as default
-    const storedTheme = localStorage.getItem('theme');
-    if (storedTheme && (storedTheme === 'light' || storedTheme === 'dark')) {
-        theme.value = storedTheme as 'light' | 'dark';
-    } else {
-        // Always default to light theme, ignore system preference
-        theme.value = 'light';
-        // Save the default choice to localStorage
-        localStorage.setItem('theme', 'light');
-    }
-
-    // Apply the theme
-    applyTheme(theme.value);
+    // Force light theme - no checks, just apply light mode
+    theme.value = 'light';
+    localStorage.setItem('theme', 'light'); // Save to localStorage too
+    applyTheme('light');
 });
 
 // Toggle theme function
