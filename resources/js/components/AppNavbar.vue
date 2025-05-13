@@ -4,7 +4,7 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuL
 import { Moon, Sun } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 
-// Theme state
+// Theme state - explicitly start with light
 const theme = ref<'light' | 'dark'>('light');
 const currentPath = ref('');
 
@@ -18,16 +18,19 @@ onMounted(() => {
         currentPath.value = window.location.pathname;
     });
 
-    // Theme handling
+    // Theme handling - prioritize light as default
     const storedTheme = localStorage.getItem('theme');
-    if (storedTheme) {
+    if (storedTheme && (storedTheme === 'light' || storedTheme === 'dark')) {
         theme.value = storedTheme as 'light' | 'dark';
-        applyTheme(theme.value);
     } else {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        theme.value = prefersDark ? 'dark' : 'light';
-        applyTheme(theme.value);
+        // Always default to light theme, ignore system preference
+        theme.value = 'light';
+        // Save the default choice to localStorage
+        localStorage.setItem('theme', 'light');
     }
+
+    // Apply the theme
+    applyTheme(theme.value);
 });
 
 // Toggle theme function
