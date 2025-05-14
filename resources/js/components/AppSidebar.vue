@@ -8,7 +8,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroupLabel, SidebarHeader, SidebarRail } from '@/components/ui/sidebar';
 
 import { usePage } from '@inertiajs/vue3';
-import { PieChart, ShoppingCart, Square, Store, TimerIcon, User, BookOpen, MessageCircleHeart } from 'lucide-vue-next';
+import { BookOpen, MessageCircleHeart, PieChart, ShoppingCart, Square, Store, TimerIcon, User } from 'lucide-vue-next';
 import { computed, onMounted } from 'vue';
 
 const props = withDefaults(defineProps<SidebarProps>(), {
@@ -125,13 +125,13 @@ const data = {
             roles: ['mahasiswa'],
         },
         {
-            title: 'PreOrder Mahasiswa',
+            title: 'List Pesanan',
             url: '/mahasiswa/pre-orders',
             icon: ShoppingCart,
             roles: ['mahasiswa'],
         },
         {
-            title: 'Pemesanan Onsite',
+            title: 'Pesanan OnSite',
             url: '/mahasiswa/on-site-orders',
             icon: ShoppingCart,
             roles: ['mahasiswa'],
