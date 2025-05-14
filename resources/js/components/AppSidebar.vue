@@ -125,7 +125,7 @@ const data = {
             roles: ['mahasiswa'],
         },
         {
-            title: 'List Pesanan',
+            title: 'List Pesanann',
             url: '/mahasiswa/pre-orders',
             icon: ShoppingCart,
             roles: ['mahasiswa'],
