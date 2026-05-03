@@ -15,7 +15,12 @@ class HomeController extends Controller
     // Menampilkan halaman home
     public function showHomeView()
     {
+        $currentYear = (string) now()->year;
+
         $tenants = Tenant::with(['tahunExpo', 'kategori', 'products'])
+            ->whereHas('tahunExpo', function ($query) use ($currentYear) {
+                $query->where('tahun', $currentYear);
+            })
             ->orderBy('created_at', 'desc')
             // ->limit(6)  // Ambil 6 tenant terbaru - sudah dihapus agar semua tenant ditampilkan
             ->get()
@@ -32,11 +37,15 @@ class HomeController extends Controller
                 ];
             });
 
-        // Ambil total tenant untuk statistik
-        $totalTenants = Tenant::count();
+        // Ambil total tenant untuk statistik (tahun berjalan)
+        $totalTenants = Tenant::whereHas('tahunExpo', function ($query) use ($currentYear) {
+            $query->where('tahun', $currentYear);
+        })->count();
 
-        // Ambil total orders dari tabel pre_orders
-        $totalOrders = PreOrder::count();
+        // Ambil total orders dari tabel pre_orders (tahun berjalan)
+        $totalOrders = PreOrder::whereHas('tenant.tahunExpo', function ($query) use ($currentYear) {
+            $query->where('tahun', $currentYear);
+        })->count();
 
         // Ambil kategori untuk filter
         $kategoriTenants = KategoriTenant::orderBy('nama_kategori', 'asc')
@@ -49,7 +58,10 @@ class HomeController extends Controller
             });
 
         // Ambil data tahun expo terbaru untuk hero section
-        $latestTahunExpo = TahunExpo::latest('tahun')->first();
+        $latestTahunExpo = TahunExpo::where('tahun', $currentYear)->first();
+        if (!$latestTahunExpo) {
+            $latestTahunExpo = TahunExpo::latest('tahun')->first();
+        }
         $tahunExpoData = null;
 
         if ($latestTahunExpo) {
