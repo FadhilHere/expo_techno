@@ -79,10 +79,10 @@ const scrollToTenants = (event: Event) => {
                 <!-- Left Content -->
                 <div>
                     <!-- Tambahkan logo SI dan HIMA di sini, di bagian atas konten kiri -->
-                    <!-- <div class="mb-2 flex items-center space-x-2">
+                    <div class="mb-2 flex items-center space-x-2">
                         <img src="assets/Logo_SI.png" alt="Logo SI" class="h-25 w-auto" />
                         <img src="assets/LOGO_HIMA.png" alt="Logo HIMA" class="h-22 w-auto" />
-                    </div> -->
+                    </div>
 
                     <!-- Responsive title that displays differently on mobile -->
                     <div class="mb-6">
@@ -98,10 +98,10 @@ const scrollToTenants = (event: Event) => {
                     </div>
 
                     <p class="mb-8 text-gray-500">
-                        TI FEST merupakan kegiatan yang ditaja oleh Jurusan Teknologi Informasi Politeknik Caltex Riau, dengan tujuan untuk menjadi
-                        wadah ekspresi, kreativitas, dan bakat mahasiswa dalam bidang non-akademik. Kegiatan ini juga diharapkan dapat mempererat
-                        hubungan antar mahasiswa dari tiga program studi di bawah naungan Jurusan Teknologi Informasi, yaitu Teknik Informatika,
-                        Sistem Informasi, dan Teknik Rekayasa Komputer.
+                        Event ini diselenggarakan oleh Program Studi Sistem Informasi melalui mata kuliah IS Technopreneurship sebagai puncak dari
+                        proses pendampingan UMKM yang berlangsung selama setengah semester. Kegiatan ini merupakan wadah bagi mahasiswa untuk
+                        menampilkan hasil kolaborasi dengan pelaku UMKM dalam mengembangkan solusi digital yang inovatif untuk mendorong pertumbuhan
+                        usaha lokal.
                     </p>
                     <a
                         href="#tenant-section"
